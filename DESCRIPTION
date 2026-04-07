@@ -1,0 +1,40 @@
+Package: rENM.analysis
+Type: Package
+Title: Analysis tools for the rENM framework
+Version: 0.1.0.9000
+Author: John L. Schnase
+Maintainer: John L. Schnase <jschnase@mac.com>
+ORCID: 0000-0001-7473-3977
+Description: The rENM framework is a modular sysem for 
+    reconstucting and analyzing long-term ecological niche 
+    dynamics using time-indexed environmental data and species 
+    occurrence records. Its packages support climate-based 
+    niche modeling, temporal analysis of climatic suitability, 
+    and reproducible workflows for studying ecological change.
+License: MIT + file LICENSE
+Encoding: UTF-8
+RoxygenNote: 7.3.3
+URL: https://github.com/jschnase/rENM.analysis
+BugReports: https://github.com/jschnase/rENM.analysis/issues
+Imports:
+  rENM.core,
+  bayestestR,
+  dplyr,
+  geosphere,
+  ggplot2,
+  mblm,
+  paletteer,
+  readr,
+  rlang,
+  rstanarm,
+  scales,
+  sf,
+  stats,
+  stringr,
+  terra,
+  tibble,
+  tidyr,
+  tidyselect,
+  tools,
+  utils
+
