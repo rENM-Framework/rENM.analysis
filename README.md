@@ -1,5 +1,7 @@
 # rENM.analysis
 
+![rENM](https://img.shields.io/badge/rENM-framework-blue) ![module](https://img.shields.io/badge/module-analysis-informational)
+
 **Trend analysis and derived metrics for the rENM Framework**
 
 ## Overview
