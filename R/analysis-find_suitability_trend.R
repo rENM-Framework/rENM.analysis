@@ -132,8 +132,8 @@ find_suitability_trend <- function(alpha_code) {
 
   log_path <- file.path(root_dir, "_log.txt")
 
-  cat("------------------------------------------------------------------------\n")
-  cat(sprintf("find_suitability_trend(): starting for %s\n", code))
+  message("------------------------------------------------------------------------")
+  message(sprintf("find_suitability_trend(): starting for %s", code))
 
   ## ------------------------ Discover available years ---------------------- ##
   files <- vapply(
@@ -223,54 +223,26 @@ find_suitability_trend <- function(alpha_code) {
   ## -------------------------- PNG output --------------------------------- ##
   png_path <- NA_character_
 
-  if (exists("save_trend_plot", where = asNamespace("rENM.analysis"), mode = "function")) {
-
-    cat("Calling save_trend_plot() to generate PNG...\n")
-
+  if (exists("save_trend_plot", mode = "function")) {
+    message("Calling save_trend_plot() to generate PNG...")
     png_path <- tryCatch(
-      {
-        rENM.analysis::save_trend_plot(code, tif_out$trend)
-      },
+      save_trend_plot(code, tif_out$trend),
       error = function(e) {
-        warning(
-          sprintf("save_trend_plot() failed: %s", conditionMessage(e)),
-          call. = FALSE
-        )
+        warning(sprintf("save_trend_plot() failed: %s", conditionMessage(e)), call. = FALSE)
         NA_character_
       }
     )
-
   } else {
-    cat("save_trend_plot() not found in namespace; skipping PNG generation.\n")
+    message("save_trend_plot() not found; skipping PNG generation.")
   }
 
-  invisible(list(
-    paths   = list(asc = asc_out, tif = tif_out, png = png_path, log = log_path),
-    n_years = length(years)
-  ))
-
-  # ## ------------------------------ Logging -------------------------------- ##
-  # log_block <- c(
-  #   "",
-  #   "------------------------------------------------------------------------",
-  #   "Processing summary (find_suitability_trend)",
-  #   sprintf("Timestamp: %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-  #   sprintf("Alpha code: %s", code),
-  #   sprintf("Years used: %s", paste(years, collapse = ", "))
-  # )
-  #
-  # cat(log_block, file = log_path, sep = "\n", append = TRUE)
-
   ## ------------------------------ Logging -------------------------------- ##
-
-  # --- build summary stats ---
-  n_years <- length(years)
-  n_cells <- terra::ncell(r_stack)
-  n_na_slope <- sum(is.na(terra::values(slope_r)))
+  n_years       <- length(years)
+  n_cells       <- terra::ncell(r_stack)
+  n_na_slope    <- sum(is.na(terra::values(slope_r)))
   n_valid_slope <- n_cells - n_na_slope
 
-  # --- elapsed time ---
-  t_end <- Sys.time()
+  t_end   <- Sys.time()
   elapsed <- round(as.numeric(difftime(t_end, t_start, units = "secs")), 2)
 
   log_block <- c(
@@ -306,4 +278,8 @@ find_suitability_trend <- function(alpha_code) {
 
   cat(log_block, file = log_path, sep = "\n", append = TRUE)
 
+  invisible(list(
+    paths   = list(asc = asc_out, tif = tif_out, png = png_path, log = log_path),
+    n_years = n_years
+  ))
 }

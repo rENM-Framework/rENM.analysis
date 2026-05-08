@@ -84,6 +84,10 @@
 #'   summarize_variable_contributions("CASP")
 #' }
 #'
+#' @importFrom rstanarm stan_glm posterior_epred normal
+#' @importFrom stats gaussian lm coef var sd quantile setNames
+#' @importFrom utils getFromNamespace
+#'
 #' @export
 summarize_variable_contributions <- function(alpha_code,
                                              top_n = 10,
@@ -163,16 +167,8 @@ summarize_variable_contributions <- function(alpha_code,
     stop("Package 'rstanarm' is required for Bayesian regression. Please install it: install.packages('rstanarm')")
   }
 
-  readr    <- asNamespace("readr")
-  dplyr    <- asNamespace("dplyr")
-  tidyr    <- asNamespace("tidyr")
-  ggplot2  <- asNamespace("ggplot2")
-  stringr  <- asNamespace("stringr")
-  rstanarm <- asNamespace("rstanarm")
-
   # Optional: markdown-capable legend labels if ggtext is installed
-  has_ggtext <- "ggtext" %in% rownames(utils::installed.packages())
-  if (has_ggtext) ggtext <- asNamespace("ggtext")
+  has_ggtext <- requireNamespace("ggtext", quietly = TRUE)
 
   # ---- Reusable themes -------------------------------------------------------
   trend_theme_base <- function() {
@@ -192,7 +188,8 @@ summarize_variable_contributions <- function(alpha_code,
         panel.border        = ggplot2::element_rect(color = "darkgray", fill = NA, linewidth = 0.8)
       )
     if (has_ggtext) {
-      base <- base + ggplot2::theme(legend.text = ggtext$element_markdown(size = 16))
+      element_markdown <- getFromNamespace("element_markdown", "ggtext")
+      base <- base + ggplot2::theme(legend.text = element_markdown(size = 16))
     } else {
       base <- base + ggplot2::theme(legend.text = ggplot2::element_text(size = 16))
     }
@@ -204,7 +201,7 @@ summarize_variable_contributions <- function(alpha_code,
 
   # ---- [4/13] read -----------------------------------------------------------
   message(">>> [4/13] Reading input CSV: ", csv_path)
-  df <- readr$read_csv(csv_path, show_col_types = FALSE)
+  df <- readr::read_csv(csv_path, show_col_types = FALSE)
 
   req_cols <- c("Variable", "mean_pct")
   if (!all(req_cols %in% names(df))) {
@@ -307,10 +304,10 @@ summarize_variable_contributions <- function(alpha_code,
     d <- split_list[[v]]
     d <- d[!is.na(d$percent) & !is.na(d$YearNum), ]
     if (nrow(d) >= 2 && length(unique(d$YearNum)) >= 2) {
-      fit <- rstanarm$stan_glm(
+      fit <- rstanarm::stan_glm(
         percent ~ YearNum, data = d, family = gaussian(),
-        prior = rstanarm$normal(0, 10, autoscale = TRUE),
-        prior_intercept = rstanarm$normal(0, 10, autoscale = TRUE),
+        prior = rstanarm::normal(0, 10, autoscale = TRUE),
+        prior_intercept = rstanarm::normal(0, 10, autoscale = TRUE),
         chains = 4, iter = 2000, seed = 1234, refresh = 0
       )
       post <- as.data.frame(as.matrix(fit))
@@ -653,14 +650,14 @@ summarize_variable_contributions <- function(alpha_code,
   ggplot2::ggsave(png_br_pts_norib, p_br_pts_norib, width = width_in, height = height_in, dpi = dpi_out, units = "in", bg = "white")
 
   if (nrow(stats_lr_df) > 0) {
-    readr$write_csv(stats_lr_df, stats_lr_path)
+    readr::write_csv(stats_lr_df, stats_lr_path)
   } else {
-    readr$write_csv(stats_lr_df[0, ], stats_lr_path)
+    readr::write_csv(stats_lr_df[0, ], stats_lr_path)
   }
   if (nrow(stats_br_df) > 0) {
-    readr$write_csv(stats_br_df, stats_br_path)
+    readr::write_csv(stats_br_df, stats_br_path)
   } else {
-    readr$write_csv(stats_br_df[0, ], stats_br_path)
+    readr::write_csv(stats_br_df[0, ], stats_br_path)
   }
 
   message("    Saved: ", png_heatmap,      " (1350x750 px @ 72 dpi)")
@@ -745,11 +742,3 @@ summarize_variable_contributions <- function(alpha_code,
 }
 
 ## Global variable declarations for R CMD check (not part of roxygen docs)
-if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c(
-    "Variable", "Year", "YearNum",
-    "mean_pct", "percent",
-    "q2.5", "q97.5",
-    "years_present"
-  ))
-}

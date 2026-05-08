@@ -79,7 +79,6 @@
 #' @importFrom ggplot2 ggplot geom_raster geom_sf aes scale_fill_gradient2
 #' @importFrom ggplot2 coord_sf labs theme_minimal theme element_rect
 #' @importFrom ggplot2 element_line element_blank element_text unit
-#' @importFrom paletteer paletteer_c
 #' @importFrom scales rescale
 #' @importFrom stats quantile
 #'
@@ -95,20 +94,14 @@
 #' @export
 plot_suitability_change_trend <- function(alpha_code, raster_file, zero_band_frac = 0.80) {
   # ---- Dependencies ----
-  if (!requireNamespace("terra", quietly = TRUE))     stop("Package 'terra' is required.")
-  if (!requireNamespace("sf", quietly = TRUE))        stop("Package 'sf' is required.")
-  if (!requireNamespace("ggplot2", quietly = TRUE))   stop("Package 'ggplot2' is required.")
-  if (!requireNamespace("paletteer", quietly = TRUE)) stop("Package 'paletteer' is required.")
-  if (!requireNamespace("scales", quietly = TRUE))    stop("Package 'scales' is required.")
+  if (!requireNamespace("terra",   quietly = TRUE)) stop("Package 'terra' is required.")
+  if (!requireNamespace("sf",      quietly = TRUE)) stop("Package 'sf' is required.")
+  if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Package 'ggplot2' is required.")
+  if (!requireNamespace("scales",  quietly = TRUE)) stop("Package 'scales' is required.")
 
   # ---- Species info ----
   code <- toupper(alpha_code %||% "")
   if (!nzchar(code)) stop("`alpha_code` must be a non-empty character string.")
-
-  # get_species_info() is assumed to be available in the package or search path
-  if (!exists("get_species_info", mode = "function")) {
-    stop("Function `get_species_info()` must be available (e.g., exported by this package).")
-  }
 
   si <- try(get_species_info(code), silent = TRUE)
   if (inherits(si, "try-error") || is.null(si)) {
@@ -124,12 +117,7 @@ plot_suitability_change_trend <- function(alpha_code, raster_file, zero_band_fra
   }
 
   # ---- Paths ----
-  cat("------------------------------------------------------------------------\nplot_suitability_change_trend(): starting (divergent colors)\n")
-
-  # Use project directory helper
-  if (!exists("rENM_project_dir", mode = "function")) {
-    stop("Function `rENM_project_dir()` must be available (e.g., exported by this package).")
-  }
+  message("plot_suitability_change_trend(): starting (divergent colors)")
   project_dir <- rENM_project_dir()
 
   states_path <- file.path(project_dir, "data", "shapefiles",
@@ -185,29 +173,7 @@ plot_suitability_change_trend <- function(alpha_code, raster_file, zero_band_fra
     max_abs <- max(abs(rng), na.rm = TRUE)
   }
 
-  # ---- Palette ----
-  pal_full <- as.character(
-    paletteer::paletteer_c("ggthemes::Classic Area Red-Green", n = 401)
-  )
-  pick_col <- function(p) {
-    pal_full[pmax(1, pmin(length(pal_full), round(p * (length(pal_full) - 1)) + 1))]
-  }
-
   zero_band_frac <- max(0, min(0.90, zero_band_frac))
-  z0 <- max_abs * zero_band_frac
-
-  grad_values <- scales::rescale(
-    c(-max_abs, -z0, 0, +z0, +max_abs),
-    to   = c(0, 1),
-    from = c(-max_abs, +max_abs)
-  )
-  grad_colors <- c(
-    pick_col(0.00),
-    pick_col(0.35),
-    "white",
-    pick_col(0.65),
-    pick_col(1.00)
-  )
 
   # ---- Plot ----
   ex <- terra::ext(r)
@@ -276,9 +242,5 @@ plot_suitability_change_trend <- function(alpha_code, raster_file, zero_band_fra
 
   cat(sprintf("Cells plotted: %s\n",
               format(n_cells, big.mark = ",", scientific = FALSE)))
-  cat("plot_suitability_change_trend(): done. Returning ggplot object.\n")
   invisible(list(plot = gp, lims = lims, n_cells = n_cells))
 }
-
-# Small infix helper
-`%||%` <- function(a, b) if (is.null(a)) b else a

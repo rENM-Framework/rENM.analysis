@@ -101,10 +101,6 @@ save_trend_plot <- function(alpha_code, raster_file) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required.", call. = FALSE)
   }
-  if (!exists("plot_trend", mode = "function")) {
-    stop("Internal helper `plot_trend()` not found. Is rENM.core loaded?", call. = FALSE)
-  }
-
   code <- toupper(alpha_code)
 
   ## ------------------------- Generate plot -------------------------------- ##
@@ -139,15 +135,7 @@ save_trend_plot <- function(alpha_code, raster_file) {
 
   if (is.character(raster_file) && length(raster_file) == 1L) {
     fbase <- basename(raster_file)
-
-    stem <- tryCatch(
-      utils::tail(strsplit(fbase, "\\.", fixed = FALSE)[[1]], 2L)[1],
-      error = function(e) tools::file_path_sans_ext(fbase)
-    )
-
-    if (is.na(stem) || !nzchar(stem)) {
-      stem <- tools::file_path_sans_ext(fbase)
-    }
+    stem  <- tools::file_path_sans_ext(fbase)
 
     if (grepl(paste0("^", code, "-"), stem, ignore.case = TRUE)) {
       name_part <- sub(paste0("^", code, "-"), "", stem, ignore.case = TRUE)

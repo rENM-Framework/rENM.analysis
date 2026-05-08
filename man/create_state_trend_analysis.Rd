@@ -32,10 +32,6 @@ publication-ready map showing spatial patterns and state-level metrics.
 Results include tabular summaries, visualization, and logging.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item U.S. state boundaries:

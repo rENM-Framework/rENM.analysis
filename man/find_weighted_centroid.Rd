@@ -41,10 +41,6 @@ raster for a given 5-year time step. If year is omitted, all standard
 time steps are scanned and processed where inputs exist.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item Input file:

@@ -103,10 +103,6 @@ create_suitability_change_map <- function(alpha_code, raster_file = NULL) {
     stop("Package 'ggplot2' is required.", call. = FALSE)
   }
 
-  if (!exists("rENM_project_dir", mode = "function")) {
-    stop("Function `rENM_project_dir()` must be available (e.g., exported by this package).")
-  }
-
   project_dir <- rENM_project_dir()
 
   t_start <- Sys.time()

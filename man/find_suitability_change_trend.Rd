@@ -30,10 +30,6 @@ and computes robust Theil-Sen trend layers representing suitability
 change over time (i.e., acceleration or deceleration).
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item GeoTIFF prediction layers located at:

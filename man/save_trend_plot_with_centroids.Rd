@@ -2,7 +2,7 @@
 % Please edit documentation in R/analysis-save_trend_plot_with_centroids.R
 \name{save_trend_plot_with_centroids}
 \alias{save_trend_plot_with_centroids}
-\title{Save suitability trend plot with entroids to File}
+\title{Save suitability trend plot with centroids to file}
 \usage{
 save_trend_plot_with_centroids(
   alpha_code,

@@ -39,10 +39,6 @@ and summarizes proportions of positive, negative, and zero values across
 the full modeled extent.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item Species identifier provided as \code{alpha_code}.

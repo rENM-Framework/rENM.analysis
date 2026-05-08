@@ -75,7 +75,6 @@
 #' @importFrom ggplot2 ggplot geom_raster aes geom_sf scale_fill_gradient2 labs
 #'   coord_sf theme_minimal theme element_rect element_line element_text
 #' @importFrom stats quantile
-#' @importFrom utils globalVariables
 #'
 #' @examples
 #' \dontrun{
@@ -112,10 +111,6 @@ plot_trend <- function(alpha_code, raster_file, zero_band_frac = 0.80) {
   code <- toupper(alpha_code)
 
   ## ------------------------ Species info / shapefile ---------------------- ##
-  if (!exists("get_species_info", mode = "function")) {
-    stop("Internal helper `get_species_info()` not found. Is rENM.core loaded?", call. = FALSE)
-  }
-
   si <- try(get_species_info(code), silent = TRUE)
   if (inherits(si, "try-error") || is.null(si)) {
     stop("get_species_info() failed for alpha_code: ", code)

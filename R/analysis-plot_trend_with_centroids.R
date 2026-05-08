@@ -146,10 +146,6 @@ plot_trend_with_centroids <- function(alpha_code,
     stop("`alpha_code` must be a non-empty character string.", call. = FALSE)
   }
 
-  if (!exists("get_species_info", mode = "function")) {
-    stop("get_species_info() not found; is the package loaded?", call. = FALSE)
-  }
-
   si <- try(get_species_info(code), silent = TRUE)
   if (inherits(si, "try-error") || is.null(si)) {
     stop("get_species_info() failed for alpha_code: ", code, call. = FALSE)
@@ -362,5 +358,3 @@ plot_trend_with_centroids <- function(alpha_code,
 
   invisible(list(plot = gp, lims = lims, n_cells = n_cells, centroids = cent_segments))
 }
-
-`%||%` <- function(a, b) if (is.null(a)) b else a

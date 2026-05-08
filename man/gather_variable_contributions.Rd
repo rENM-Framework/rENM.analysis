@@ -32,10 +32,6 @@ into a single summary dataset for a species. Produces a unified CSV and
 appends a detailed processing log with per-year results.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item Ranked variable importance files (PI-Ranked):

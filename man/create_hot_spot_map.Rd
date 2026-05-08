@@ -2,95 +2,52 @@
 % Please edit documentation in R/analysis-create_hot_spot_map.R
 \name{create_hot_spot_map}
 \alias{create_hot_spot_map}
-\title{Create and save a "hot spot" map for a species}
+\title{Create and save a hot-spot map for a species}
 \usage{
 create_hot_spot_map(alpha_code)
 }
 \arguments{
-\item{alpha_code}{Character. Four-letter species code (e.g., "CASP",
-"LOSH").}
+\item{alpha_code}{Character. Four-letter species code (e.g., \code{"CASP"}).}
 }
 \value{
-A List containing:
-\itemize{
-  \item \code{plot}: ggplot object representing the rendered map.
-  \item \code{png}: Character file path to the saved PNG map.
-  \item \code{stats}: Character file path to the saved CSV file
-  containing per-state hot-spot statistics.
-}
-Side effects:
-\itemize{
-  \item PNG map is written to disk.
-  \item CSV file of per-state statistics is written to disk.
-  \item Log entries are appended to:
-  \code{<project_dir>/runs/<alpha_code>/_log.txt}
-}
+Invisible list with \code{plot} (ggplot), \code{png} (file path),
+  and \code{stats} (CSV path). Primary side effects are the PNG and CSV
+  files written to disk and a log entry.
 }
 \description{
-Build a publication-ready hot spot map for a species. In this experimental
-metric we define hot spots as areas where declining trends are accelerating.
+Build a publication-ready hot-spot map identifying areas where declining
+suitability trends are accelerating. Calls \code{\link{find_hot_spots}}
+(and \code{\link{find_suitability_change_trend}} if needed) automatically,
+then computes per-state hot-spot statistics for states intersecting the
+species GAP range.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
+Hot spots are defined as cells where the baseline suitability trend
+(A) is negative \strong{and} the suitability change trend (B) is
+positive.
 
-\strong{Pipeline context}
-Builds a publication-ready hot-spot map for a species. Hot spots are
-where the baseline suitability trend is negative and the suitability
-change trend (acceleration) is positive. Automatically generates
-missing inputs and logs an eBird-standard processing summary.
-
-In addition, for U.S. states intersecting the species GAP range, this
-function computes:
+Per-state statistics:
 \itemize{
-  \item hot-spot area (km^2) within each intersecting state, and
-  \item percent of the state covered by hot spots,
-}
-and writes a per-state table to:
-\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-\code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots-Stats.csv}
-
-\strong{Inputs}
-\itemize{
-  \item Species alpha code used to locate input rasters and shapefiles.
+  \item Hot-spot area (km\eqn{^2}) within each intersecting state.
+  \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
+    where the denominator is the state area clipped to the raster
+    footprint (to avoid inflating percentages for partially covered states).
 }
 
-\strong{Outputs}
-\itemize{
-  \item Hot-spot map saved as PNG.
-  \item Per-state statistics written as CSV.
-  \item ggplot object returned invisibly.
-}
+Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
+intersecting with the GAP range. Input rasters are read from
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}.
 
-\strong{Methods}
+Outputs:
 \itemize{
-  \item Hot-spot mask is created by \code{find_hot_spots()} if needed,
-  using (A < 0) and (B > 0) with A = baseline trend and
-  B = suitability change trend.
-  \item Area and percentage method:
-  \itemize{
-    \item Hot-spot area is computed by summing cell areas (km^2) for
-    cells with value 1 in the hot-spot mask within each state polygon.
-    \item To avoid inflating percentages when rasters do not span an
-    entire state, the state denominator is the area of the state
-    clipped to the raster footprint (state intersect raster extent),
-    in km^2.
-    \item Percent coverage is 100 * hotspot_area_km2 / state_area_km2.
-  }
+  \item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots.png}
+  \item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots-Stats.csv}
 }
-
-\strong{Data requirements}
-\itemize{
-  \item Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded
-  before intersecting with the GAP range.
-  \item Input rasters and shapefiles must exist within:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-}
+A summary is appended to \code{<project_dir>/runs/<alpha_code>/_log.txt}.
 }
 \examples{
 \dontrun{
-create_hot_spot_map("CASP")
+  create_hot_spot_map("CASP")
 }
 
 }

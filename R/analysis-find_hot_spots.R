@@ -5,10 +5,6 @@
 #' positive. Hot-spot cells are coded as 1 and all others as 0.
 #'
 #' @details
-#' This function is part of the rENM framework's processing pipeline
-#' and operates within the project directory structure defined by
-#' rENM_project_dir().
-#'
 #' \strong{Pipeline context}
 #' Creates a binary hot-spot raster identifying cells where:
 #' A (<alpha_code>-Suitability-Trend.tif) < 0 AND
@@ -70,10 +66,6 @@
 find_hot_spots <- function(alpha_code) {
   if (!requireNamespace("terra", quietly = TRUE)) {
     stop("Package 'terra' is required but not installed.")
-  }
-
-  if (!exists("rENM_project_dir", mode = "function")) {
-    stop("Function `rENM_project_dir()` must be available (e.g., exported by this package).")
   }
 
   project_dir <- rENM_project_dir()

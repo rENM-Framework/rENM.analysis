@@ -31,10 +31,6 @@ values within a species GAP range using a masked raster. Results are
 summarized, written to disk, and logged.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Inputs}
 \itemize{
   \item Species table:

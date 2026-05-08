@@ -1,162 +1,61 @@
 #' Analyze temporal trends in suitability centroids
 #'
-#' Fits Bayesian linear trends to species' annual weighted centroids
-#' (latitude and longitude) returned by [find_weighted_centroid()].
-#' Exports plots, CSV summaries, and model objects to the species run
-#' directory.
+#' Fits Bayesian linear trends to a species' weighted centroids (latitude and
+#' longitude) returned by \code{\link{find_weighted_centroid}} and exports
+#' plots, CSV summaries, and model objects to the species run directory.
 #'
 #' @details
-#' This function is part of the rENM framework's processing pipeline
-#' and operates within the project directory structure defined by
-#' rENM_project_dir().
-#'
-#' \strong{Pipeline context.}
-#' The function:
-#' \itemize{
-#'   \item Loads annual centroid data
-#'   \item Performs input validation and dependency checks
-#'   \item Fits separate \code{lat ~ year} and \code{lon ~ year}
-#'         Bayesian GLMs via rstanarm
-#'   \item Summarizes slope posteriors with bayestestR (95\% CI, PD)
-#'         and ROPE for the slope with a user-set practical band
-#'   \item Produces prediction ribbons and lines with ggplot2
-#'   \item Writes PNG, CSV, and RDS outputs
-#'   \item Appends a human-readable block to the species log file
-#' }
-#'
-#' \strong{Inputs.}
-#' Upstream requirement: A function
-#' \code{find_weighted_centroid(alpha_code)} must be discoverable on the
-#' R search path or in one of the standard rENM locations (see file
-#' discovery below). It must return a data frame with columns:
-#' \itemize{
-#'   \item \code{year} (numeric or integer; analysis year)
-#'   \item \code{lon}  (numeric; centroid longitude)
-#'   \item \code{lat}  (numeric; centroid latitude)
-#' }
-#' and may optionally include \code{status} where rows with
-#' \code{status == "ok"} are kept.
-#'
-#' \strong{Directory layout.}
-#' \itemize{
-#'   \item Species root:
-#'     \code{<project_dir>/runs/}
-#'     \code{<alpha_code>/}
-#'   \item Outputs:
-#'     \code{<project_dir>/runs/}
-#'     \code{<alpha_code>/Trends/centroids/}
-#'   \item Log:
-#'     \code{<project_dir>/runs/}
-#'     \code{<alpha_code>/_log.txt}
-#' }
-#'
-#' \strong{File discovery for find_weighted_centroid.R.}
-#' Searched in order:
-#' \itemize{
-#'   \item \code{find_weighted_centroid.R} (working directory)
-#'   \item \code{<project_dir>/find_weighted_centroid.R}
-#'   \item \code{<project_dir>/R/find_weighted_centroid.R}
-#'   \item \code{<project_dir>/scripts/find_weighted_centroid.R}
-#'   \item \code{<project_dir>/code/find_weighted_centroid.R}
-#' }
-#'
-#' \strong{Methods.}
-#' \itemize{
-#'   \item Separate Gaussian models are fit with
-#'         \code{rstanarm::stan_glm()}:
-#'         \code{lat ~ (year - mean(year))} and
-#'         \code{lon ~ (year - mean(year))}
-#'   \item Slope posteriors are summarized with 95\% CI,
-#'         \code{p_direction} (PD), and ROPE (percent of posterior
-#'         within the practical band)
-#'   \item Posterior expected values (\code{posterior_epred}) are
-#'         computed on a 5-year grid for plotting ribbons and trend lines
-#'   \item A fixed seed (1234) is used for reproducibility
-#' }
+#' Fits separate Gaussian models via \code{rstanarm::stan_glm()}:
+#' \code{lat ~ (year - mean(year))} and \code{lon ~ (year - mean(year))}.
+#' Slope posteriors are summarized with 95\% CI, \code{p_direction} (PD),
+#' and ROPE (percent of posterior within the practical equivalence band).
+#' Posterior expected values are computed on a 5-year grid for plotting
+#' ribbons and trend lines. A fixed seed (1234) is used for reproducibility.
 #'
 #' \strong{ROPE decision rule (slope).}
-#' Let \code{w = rope_width_deg_per_year}. We compute
-#' \code{rope_pct = 100 * mean(beta in [-w, +w])} from the slope
-#' posterior \code{beta}. We report:
+#' Let \code{w = rope_width_deg_per_year}. The posterior is evaluated against
+#' \code{[-w, +w]}. The decision is \code{"inside"} if 100\% of draws fall
+#' within ROPE, \code{"outside"} if 0\% do, and \code{"overlaps"} otherwise.
+#'
+#' Outputs written to \code{<project_dir>/runs/<alpha_code>/Trends/centroids/}:
 #' \itemize{
-#'   \item \code{inside}   if \code{rope_pct == 100}
-#'   \item \code{outside}  if \code{rope_pct == 0}
-#'   \item \code{overlaps} otherwise
+#'   \item \code{<ALPHA>-Centroids-Latitude-Trend.png}
+#'   \item \code{<ALPHA>-Centroids-Longitude-Trend.png}
+#'   \item \code{<ALPHA>-Centroids-Latitude-Summary.csv}
+#'   \item \code{<ALPHA>-Centroids-Longitude-Summary.csv}
+#'   \item \code{<ALPHA>-Centroids-Latitude-Model.rds}
+#'   \item \code{<ALPHA>-Centroids-Longitude-Model.rds}
 #' }
+#' A summary block is appended to
+#' \code{<project_dir>/runs/<alpha_code>/_log.txt}.
 #'
-#' \strong{Outputs.}
-#' The following files are created in \code{Trends/centroids/}
-#' (overwritten if present):
-#' \itemize{
-#'   \item \code{"<ALPHA>-Centroids-Latitude-Trend.png"}
-#'   \item \code{"<ALPHA>-Centroids-Longitude-Trend.png"}
-#'   \item \code{"<ALPHA>-Centroids-Latitude-Summary.csv"}
-#'   \item \code{"<ALPHA>-Centroids-Longitude-Summary.csv"}
-#'   \item \code{"<ALPHA>-Centroids-Latitude-Model.rds"}
-#'   \item \code{"<ALPHA>-Centroids-Longitude-Model.rds"}
-#' }
-#' A summary block is also appended to \code{"_log.txt"} under the
-#' species root.
+#' @param alpha_code Character. Four-letter species alpha code (e.g.,
+#'   \code{"CASP"}). Must be exactly 4 uppercase letters.
+#' @param rope_width_deg_per_year Numeric. Half-width of the ROPE for the
+#'   slope (degrees per year). Default 0.05.
+#' @param rope_ci Numeric. Credible interval level (0--1) for slope CI
+#'   summaries. Default 0.95.
 #'
-#' \strong{Data requirements and failure modes.}
-#' \itemize{
-#'   \item Missing packages: a clear error lists what to install
-#'   \item Missing or invalid find_weighted_centroid.R or malformed return
-#'   \item Fewer than 3 valid years (insufficient to estimate a trend)
-#' }
+#' @return Invisible list with:
+#'   \code{data} (filtered data frame),
+#'   \code{fit_lat}, \code{fit_lon} (stanreg objects),
+#'   \code{lat_graph}, \code{lon_graph} (ggplot objects),
+#'   \code{summaries} (list of per-dimension summary data frames),
+#'   \code{outputs} (named list of file paths).
+#'   Primary side effects are six files written to disk and a log entry.
 #'
-#' @param alpha_code Character. Four-letter species alpha code
-#' (e.g., \code{"CASP"}). Must be exactly 4 uppercase letters; used to
-#' locate and name outputs under
-#' \code{<project_dir>/runs/}
-#' \code{<alpha_code>/}.
-#'
-#' @param rope_width_deg_per_year Numeric. Half-width of the Region of
-#' Practical Equivalence (ROPE) for the slope (trend per year), expressed
-#' in degrees per year. The ROPE is taken as
-#' \code{[-rope_width_deg_per_year, +rope_width_deg_per_year]}.
-#' Defaults to \code{0.05}, i.e., +/- 0.05 degrees per year. Set based on
-#' ecological relevance (e.g., what annual shift magnitude is practically
-#' negligible for your application).
-#'
-#' @param rope_ci Numeric. Credible interval level (0-1) used for slope
-#' CI summaries. Defaults to \code{0.95} for 95\% CI (and does not affect
-#' ROPE itself).
-#'
-#' @return
-#' Invisibly returns a named list with:
-#' \itemize{
-#'   \item \code{data}: Data frame containing filtered analysis data with
-#'         columns \code{year}, \code{lon}, \code{lat}, \code{year_c}
-#'   \item \code{fit_lat}, \code{fit_lon}: rstanarm \code{stanreg} model
-#'         objects for latitude and longitude trends
-#'   \item \code{lat_graph}, \code{lon_graph}: ggplot objects for the
-#'         fitted trends
-#'   \item \code{summaries}: List with data frames \code{lat} and
-#'         \code{lon} containing:
-#'         \code{term}, \code{mean}, \code{median}, \code{ci_low},
-#'         \code{ci_high}, \code{pd}, \code{rope_low},
-#'         \code{rope_high}, \code{rope_pct}, \code{rope_decision}
-#'   \item \code{outputs}: List of absolute file paths to written PNG,
-#'         CSV, and RDS files
-#' }
-#'
+#' @seealso \code{\link{find_weighted_centroid}}, \code{\link{rENM_project_dir}}
 #' @importFrom bayestestR ci p_direction
 #' @importFrom rstanarm stan_glm posterior_epred
 #' @importFrom stats gaussian quantile
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot aes geom_point geom_ribbon geom_line labs
-#' @importFrom ggplot2 theme_bw theme element_blank ggsave
+#'   theme_bw theme element_blank ggsave
 #'
 #' @examples
 #' \dontrun{
-#' analyze_weighted_centroids("CASP")
+#'   analyze_weighted_centroids("CASP")
 #' }
-#'
-#' @seealso
-#' [find_weighted_centroid()], [rstanarm::stan_glm()],
-#' [rstanarm::posterior_epred()], [bayestestR::ci()],
-#' [bayestestR::p_direction()], [ggplot2::ggplot()]
 #'
 #' @export
 analyze_weighted_centroids <- function(alpha_code,
@@ -187,28 +86,6 @@ analyze_weighted_centroids <- function(alpha_code,
   }
   `%>%` <- dplyr::`%>%`
 
-  # ---- Source find_weighted_centroid.R --------------------------------------
-  candidate_paths <- c(
-    "find_weighted_centroid.R",
-    file.path(project_dir, "find_weighted_centroid.R"),
-    file.path(project_dir, "R", "find_weighted_centroid.R"),
-    file.path(project_dir, "scripts", "find_weighted_centroid.R"),
-    file.path(project_dir, "code", "find_weighted_centroid.R")
-  )
-  src_ok <- FALSE
-  for (p in candidate_paths) {
-    if (file.exists(p)) {
-      tryCatch({
-        sys.source(p, envir = environment())
-        src_ok <- TRUE
-        break
-      }, error = function(e) NULL)
-    }
-  }
-  if (!src_ok && !exists("find_weighted_centroid", mode = "function")) {
-    stop("Cannot find find_weighted_centroid.R. Place it in one of the searched locations.")
-  }
-
   # ---- Paths ----------------------------------------------------------------
   species_root <- file.path(project_dir, "runs", alpha_code)
   out_dir      <- file.path(species_root, "Trends", "centroids")
@@ -225,7 +102,7 @@ analyze_weighted_centroids <- function(alpha_code,
   f_lat_rds <- file.path(out_dir, sprintf("%s-Centroids-Latitude-Model.rds",    alpha_code))
   f_lon_rds <- file.path(out_dir, sprintf("%s-Centroids-Longitude-Model.rds",   alpha_code))
 
-  # Simple HH:MM:SS.ss formatter for log readability.
+  # HH:MM:SS.ss formatter
   .fmt_hms <- function(sec) {
     h <- floor(sec / 3600)
     m <- floor((sec %% 3600) / 60)
@@ -260,18 +137,18 @@ analyze_weighted_centroids <- function(alpha_code,
   set.seed(1234)
   fit_lat <- rstanarm::stan_glm(
     lat ~ year_c,
-    data   = p,
-    family = stats::gaussian(),
+    data    = p,
+    family  = stats::gaussian(),
     refresh = 0
   )
   fit_lon <- rstanarm::stan_glm(
     lon ~ year_c,
-    data   = p,
-    family = stats::gaussian(),
+    data    = p,
+    family  = stats::gaussian(),
     refresh = 0
   )
 
-  # Helper: summarize slope posterior with CI, PD, and ROPE -------------------
+  # Summarize slope posterior with CI, PD, and ROPE
   .slope_summary <- function(fit, term = "year_c",
                              rope_w = 0.05,
                              ci_level = 0.95) {
@@ -311,16 +188,8 @@ analyze_weighted_centroids <- function(alpha_code,
     )
   }
 
-  sum_lat <- .slope_summary(
-    fit_lat,
-    rope_w   = rope_width_deg_per_year,
-    ci_level = rope_ci
-  )
-  sum_lon <- .slope_summary(
-    fit_lon,
-    rope_w   = rope_width_deg_per_year,
-    ci_level = rope_ci
-  )
+  sum_lat <- .slope_summary(fit_lat, rope_w = rope_width_deg_per_year, ci_level = rope_ci)
+  sum_lon <- .slope_summary(fit_lon, rope_w = rope_width_deg_per_year, ci_level = rope_ci)
 
   # ---- Predictions ----------------------------------------------------------
   make_pred_df <- function(fit, years_seq) {
@@ -350,27 +219,19 @@ analyze_weighted_centroids <- function(alpha_code,
     ggplot2::geom_point(size = 2) +
     ggplot2::geom_ribbon(
       data = pred_lat,
-      mapping = ggplot2::aes(
-        x    = .data$year,
-        ymin = .data$lower95,
-        ymax = .data$upper95
-      ),
+      mapping = ggplot2::aes(x = .data$year, ymin = .data$lower95, ymax = .data$upper95),
       alpha = 0.2,
       inherit.aes = FALSE
     ) +
     ggplot2::geom_line(
       data = pred_lat,
-      mapping = ggplot2::aes(
-        x = .data$year,
-        y = .data$mean
-      ),
+      mapping = ggplot2::aes(x = .data$year, y = .data$mean),
       linewidth = 1,
       inherit.aes = FALSE
     ) +
     ggplot2::labs(
       title = paste0(toupper(alpha_code), " Centroid Latitude Trend"),
-      x     = "Year",
-      y     = "Latitude"
+      x = "Year", y = "Latitude"
     ) +
     base_theme
 
@@ -381,27 +242,19 @@ analyze_weighted_centroids <- function(alpha_code,
     ggplot2::geom_point(size = 2) +
     ggplot2::geom_ribbon(
       data = pred_lon,
-      mapping = ggplot2::aes(
-        x    = .data$year,
-        ymin = .data$lower95,
-        ymax = .data$upper95
-      ),
+      mapping = ggplot2::aes(x = .data$year, ymin = .data$lower95, ymax = .data$upper95),
       alpha = 0.2,
       inherit.aes = FALSE
     ) +
     ggplot2::geom_line(
       data = pred_lon,
-      mapping = ggplot2::aes(
-        x = .data$year,
-        y = .data$mean
-      ),
+      mapping = ggplot2::aes(x = .data$year, y = .data$mean),
       linewidth = 1,
       inherit.aes = FALSE
     ) +
     ggplot2::labs(
       title = paste0(toupper(alpha_code), " Centroid Longitude Trend"),
-      x     = "Year",
-      y     = "Longitude"
+      x = "Year", y = "Longitude"
     ) +
     base_theme
 

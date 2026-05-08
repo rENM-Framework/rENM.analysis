@@ -1,4 +1,4 @@
-#' Save suitability trend plot with entroids to File
+#' Save suitability trend plot with centroids to file
 #'
 #' Generate a climatic suitability trend map with centroid shift overlay
 #' and save it as a PNG image using standardized dimensions and styling.

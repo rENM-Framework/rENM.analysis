@@ -22,10 +22,6 @@ suitability trend is negative and suitability change trend is
 positive. Hot-spot cells are coded as 1 and all others as 0.
 }
 \details{
-This function is part of the rENM framework's processing pipeline
-and operates within the project directory structure defined by
-rENM_project_dir().
-
 \strong{Pipeline context}
 Creates a binary hot-spot raster identifying cells where:
 A (<alpha_code>-Suitability-Trend.tif) < 0 AND
