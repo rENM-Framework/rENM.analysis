@@ -20,13 +20,13 @@ of the near-zero band used in diverging color scaling.}
 \value{
 A List with the following elements:
 \itemize{
-  \item \code{plot}: ggplot object representing the rendered map.
-  \item \code{lims}: Numeric vector of symmetric color scale limits.
-  \item \code{n_cells}: Integer count of raster cells plotted.
+\item \code{plot}: ggplot object representing the rendered map.
+\item \code{lims}: Numeric vector of symmetric color scale limits.
+\item \code{n_cells}: Integer count of raster cells plotted.
 }
 Side effects:
 \itemize{
-  \item Console output reporting processing status and cell counts.
+\item Console output reporting processing status and cell counts.
 }
 }
 \description{
@@ -48,40 +48,40 @@ figures.
 
 \strong{Inputs}
 \itemize{
-  \item Species identifier used to retrieve GAP range information
-  via \code{get_species_info()}.
-  \item Raster input representing suitability change trend values,
-  either as a file path or an in-memory SpatRaster.
+\item Species identifier used to retrieve GAP range information
+via \code{get_species_info()}.
+\item Raster input representing suitability change trend values,
+either as a file path or an in-memory SpatRaster.
 }
 
 \strong{Outputs}
 \itemize{
-  \item A ggplot object containing raster visualization with vector
-  overlays.
-  \item Diagnostic console output reporting number of cells plotted.
-  \item Invisible list containing plot, symmetric limits, and cell
-  count.
+\item A ggplot object containing raster visualization with vector
+overlays.
+\item Diagnostic console output reporting number of cells plotted.
+\item Invisible list containing plot, symmetric limits, and cell
+count.
 }
 
 \strong{Methods}
 \itemize{
-  \item Raster values are converted to a data frame for plotting.
-  \item Symmetric color limits are derived from the (0.02, 0.98)
-  quantiles of the trend distribution.
-  \item A diverging red-white-green palette is applied using
-  \code{scale_fill_gradient2()}.
-  \item Spatial alignment is enforced by projecting vector data to
-  match the raster coordinate reference system.
+\item Raster values are converted to a data frame for plotting.
+\item Symmetric color limits are derived from the (0.02, 0.98)
+quantiles of the trend distribution.
+\item A diverging red-white-green palette is applied using
+\code{scale_fill_gradient2()}.
+\item Spatial alignment is enforced by projecting vector data to
+match the raster coordinate reference system.
 }
 
 \strong{Data requirements}
 \itemize{
-  \item U.S. state boundaries located at:
-  \code{<project_dir>/data/shapefiles/}
-  \code{tl_2012_us_state/tl_2012_us_state.shp}
-  \item Species range shapefile located at:
-  \code{<project_dir>/data/shapefiles/<gap_range>/}
-  \code{<gap_range>.shp}
+\item U.S. state boundaries located at:
+\code{<project_dir>/data/shapefiles/}
+\code{tl_2012_us_state/tl_2012_us_state.shp}
+\item Species range shapefile located at:
+\code{<project_dir>/data/shapefiles/<gap_range>/}
+\code{<gap_range>.shp}
 }
 }
 \examples{

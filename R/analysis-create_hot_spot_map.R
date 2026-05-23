@@ -38,11 +38,11 @@
 #'
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot geom_tile geom_sf geom_sf_text aes scale_fill_gradient2
-#'   coord_sf labs theme_minimal theme element_rect element_text ggsave
+#' @importFrom ggplot2 coord_sf labs theme_minimal theme element_rect element_text ggsave
 #' @importFrom sf st_read st_make_valid st_crs st_transform st_union st_intersection
-#'   st_intersects st_geometry st_point_on_surface st_bbox st_as_sfc st_sf
+#' @importFrom sf st_intersects st_geometry st_point_on_surface st_bbox st_as_sfc st_sf
 #' @importFrom terra rast same.crs project compareGeom resample vect mask crop ext crs
-#'   cellSize expanse global
+#' @importFrom terra cellSize expanse global
 #' @importFrom dplyr filter bind_rows arrange desc
 #' @importFrom readr write_csv
 #'

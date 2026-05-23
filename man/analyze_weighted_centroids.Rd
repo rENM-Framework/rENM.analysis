@@ -22,12 +22,12 @@ summaries. Default 0.95.}
 }
 \value{
 Invisible list with:
-  \code{data} (filtered data frame),
-  \code{fit_lat}, \code{fit_lon} (stanreg objects),
-  \code{lat_graph}, \code{lon_graph} (ggplot objects),
-  \code{summaries} (list of per-dimension summary data frames),
-  \code{outputs} (named list of file paths).
-  Primary side effects are six files written to disk and a log entry.
+\code{data} (filtered data frame),
+\code{fit_lat}, \code{fit_lon} (stanreg objects),
+\code{lat_graph}, \code{lon_graph} (ggplot objects),
+\code{summaries} (list of per-dimension summary data frames),
+\code{outputs} (named list of file paths).
+Primary side effects are six files written to disk and a log entry.
 }
 \description{
 Fits Bayesian linear trends to a species' weighted centroids (latitude and
@@ -37,24 +37,24 @@ plots, CSV summaries, and model objects to the species run directory.
 \details{
 Fits separate Gaussian models via \code{rstanarm::stan_glm()}:
 \code{lat ~ (year - mean(year))} and \code{lon ~ (year - mean(year))}.
-Slope posteriors are summarized with 95\% CI, \code{p_direction} (PD),
+Slope posteriors are summarized with 95\\% CI, \code{p_direction} (PD),
 and ROPE (percent of posterior within the practical equivalence band).
 Posterior expected values are computed on a 5-year grid for plotting
 ribbons and trend lines. A fixed seed (1234) is used for reproducibility.
 
 \strong{ROPE decision rule (slope).}
 Let \code{w = rope_width_deg_per_year}. The posterior is evaluated against
-\code{[-w, +w]}. The decision is \code{"inside"} if 100\% of draws fall
-within ROPE, \code{"outside"} if 0\% do, and \code{"overlaps"} otherwise.
+\code{[-w, +w]}. The decision is \code{"inside"} if 100\\% of draws fall
+within ROPE, \code{"outside"} if 0\\% do, and \code{"overlaps"} otherwise.
 
 Outputs written to \code{<project_dir>/runs/<alpha_code>/Trends/centroids/}:
 \itemize{
-  \item \code{<ALPHA>-Centroids-Latitude-Trend.png}
-  \item \code{<ALPHA>-Centroids-Longitude-Trend.png}
-  \item \code{<ALPHA>-Centroids-Latitude-Summary.csv}
-  \item \code{<ALPHA>-Centroids-Longitude-Summary.csv}
-  \item \code{<ALPHA>-Centroids-Latitude-Model.rds}
-  \item \code{<ALPHA>-Centroids-Longitude-Model.rds}
+\item \code{<ALPHA>-Centroids-Latitude-Trend.png}
+\item \code{<ALPHA>-Centroids-Longitude-Trend.png}
+\item \code{<ALPHA>-Centroids-Latitude-Summary.csv}
+\item \code{<ALPHA>-Centroids-Longitude-Summary.csv}
+\item \code{<ALPHA>-Centroids-Latitude-Model.rds}
+\item \code{<ALPHA>-Centroids-Longitude-Model.rds}
 }
 A summary block is appended to
 \code{<project_dir>/runs/<alpha_code>/_log.txt}.

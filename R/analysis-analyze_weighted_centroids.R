@@ -50,7 +50,7 @@
 #' @importFrom stats gaussian quantile
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot aes geom_point geom_ribbon geom_line labs
-#'   theme_bw theme element_blank ggsave
+#' @importFrom ggplot2 theme_bw theme element_blank ggsave
 #'
 #' @examples
 #' \dontrun{

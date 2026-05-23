@@ -13,7 +13,7 @@ find_hot_spots(alpha_code)
 A SpatRaster object representing the binary (0, 1) hot-spot mask.
 Side effects:
 \itemize{
-  \item Output raster is written to disk as a compressed GeoTIFF.
+\item Output raster is written to disk as a compressed GeoTIFF.
 }
 }
 \description{
@@ -30,35 +30,35 @@ Hot-spot cells are coded 1; all other cells are coded 0.
 
 \strong{Inputs}
 \itemize{
-  \item Baseline suitability trend raster (A).
-  \item Suitability change trend raster (B).
+\item Baseline suitability trend raster (A).
+\item Suitability change trend raster (B).
 }
 
 \strong{Outputs}
 \itemize{
-  \item Binary hot-spot raster written to disk.
+\item Binary hot-spot raster written to disk.
 }
 
 \strong{Methods}
 \itemize{
-  \item Input rasters are read from:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend.tif}
-  \code{<alpha_code>-Suitability-Difference-Trend.tif}
-  \item If grids differ in extent, resolution, or CRS, raster B is
-  resampled or projected to match raster A.
-  \item Binary mask is computed where (A < 0) AND (B > 0).
+\item Input rasters are read from:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.tif}
+\code{<alpha_code>-Suitability-Difference-Trend.tif}
+\item If grids differ in extent, resolution, or CRS, raster B is
+resampled or projected to match raster A.
+\item Binary mask is computed where (A < 0) AND (B > 0).
 }
 
 \strong{Data requirements}
 \itemize{
-  \item Input rasters located at:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend.tif}
-  \code{<alpha_code>-Suitability-Difference-Trend.tif}
-  \item Output written to:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-CCEI-Baseline.tif}
+\item Input rasters located at:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.tif}
+\code{<alpha_code>-Suitability-Difference-Trend.tif}
+\item Output written to:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-CCEI-Baseline.tif}
 }
 }
 \examples{

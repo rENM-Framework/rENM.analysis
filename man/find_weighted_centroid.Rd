@@ -17,22 +17,22 @@ processes any that have an available input raster.}
 \value{
 Data frame with columns:
 \itemize{
-  \item alpha_code: Species code passed in.
-  \item year: Year processed.
-  \item lon: Weighted centroid longitude (WGS84) or NA on failure.
-  \item lat: Weighted centroid latitude (WGS84) or NA on failure.
-  \item file: Path to the input raster used (if any).
-  \item status: Processing status ("ok" on success, otherwise a tag).
-  \item file_type: "tif" or "asc" when available.
-  \item n_cells_used: Number of non-NA cells used.
-  \item weight_sum: Sum of weights used after cleaning.
-  \item notes: Short note (e.g., "reprojected to EPSG:4326").
+\item alpha_code: Species code passed in.
+\item year: Year processed.
+\item lon: Weighted centroid longitude (WGS84) or NA on failure.
+\item lat: Weighted centroid latitude (WGS84) or NA on failure.
+\item file: Path to the input raster used (if any).
+\item status: Processing status ("ok" on success, otherwise a tag).
+\item file_type: "tif" or "asc" when available.
+\item n_cells_used: Number of non-NA cells used.
+\item weight_sum: Sum of weights used after cleaning.
+\item notes: Short note (e.g., "reprojected to EPSG:4326").
 }
 
 Side effects:
 \itemize{
-  \item Writes one CSV per successful year with columns lon, lat.
-  \item Appends a multi-line summary block to _log.txt.
+\item Writes one CSV per successful year with columns lon, lat.
+\item Appends a multi-line summary block to _log.txt.
 }
 }
 \description{
@@ -43,19 +43,19 @@ time steps are scanned and processed where inputs exist.
 \details{
 \strong{Inputs}
 \itemize{
-  \item Input file:
-  \code{<rENM_project_dir()>/runs/<alpha_code>/TimeSeries/<year>/model/}
-  \code{<alpha_code>-<year>-Prediction.(tif|asc)}
+\item Input file:
+\code{<rENM_project_dir()>/runs/<alpha_code>/TimeSeries/<year>/model/}
+\code{<alpha_code>-<year>-Prediction.(tif|asc)}
 }
 
 \strong{Outputs}
 \itemize{
-  \item Output file:
-  \code{<rENM_project_dir()>/runs/<alpha_code>/TimeSeries/<year>/model/}
-  \code{<alpha_code>-<year>-Centroid.csv}
-  \item Log file (appended):
-  \code{<rENM_project_dir()>/runs/<alpha_code>/}
-  \code{_log.txt}
+\item Output file:
+\code{<rENM_project_dir()>/runs/<alpha_code>/TimeSeries/<year>/model/}
+\code{<alpha_code>-<year>-Centroid.csv}
+\item Log file (appended):
+\code{<rENM_project_dir()>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Processing}

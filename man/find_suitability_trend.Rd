@@ -13,22 +13,22 @@ species (e.g., "CASP").}
 \value{
 Invisibly returns a List with the following structure:
 \itemize{
-  \item paths:
-    \itemize{
-      \item asc: List of file paths to AAIGrid outputs
-      \item tif: List of file paths to GeoTIFF outputs
-      \item png: Character path to PNG output (if generated)
-      \item log: Character path to log file
-    }
-  \item n_years:
-    Integer number of years used in the analysis
+\item paths:
+\itemize{
+\item asc: List of file paths to AAIGrid outputs
+\item tif: List of file paths to GeoTIFF outputs
+\item png: Character path to PNG output (if generated)
+\item log: Character path to log file
+}
+\item n_years:
+Integer number of years used in the analysis
 }
 
 Side effects:
 \itemize{
-  \item Writes raster outputs to the Trends/suitability directory
-  \item Appends a processing summary to the log file
-  \item Optionally generates a PNG visualization
+\item Writes raster outputs to the Trends/suitability directory
+\item Appends a processing summary to the log file
+\item Optionally generates a PNG visualization
 }
 }
 \description{
@@ -65,12 +65,12 @@ Results are written to:
 as both AAIGrid (.asc) and GeoTIFF (.tif) with filenames:
 
 \itemize{
-  \item <alpha_code>-Suitability-Trend.\{asc,tif\}
-        (Theil-Sen slope per year)
-  \item <alpha_code>-Suitability-Trend-p.\{asc,tif\}
-        (Mann-Kendall p-value)
-  \item <alpha_code>-Suitability-Trend-z.\{asc,tif\}
-        (Mann-Kendall Z statistic)
+\item <alpha_code>-Suitability-Trend.\{asc,tif\}
+(Theil-Sen slope per year)
+\item <alpha_code>-Suitability-Trend-p.\{asc,tif\}
+(Mann-Kendall p-value)
+\item <alpha_code>-Suitability-Trend-z.\{asc,tif\}
+(Mann-Kendall Z statistic)
 }
 
 Any .xml or .prj sidecar files in the output directory are removed.
@@ -105,5 +105,5 @@ outputs.
 
 }
 \seealso{
-[save_trend_plot()], [plot_trend()]
+\code{\link[=save_trend_plot]{save_trend_plot()}}, \code{\link[=plot_trend]{plot_trend()}}
 }

@@ -12,25 +12,25 @@ find_trend_percentages(alpha_code)
 \value{
 Tibble. A single-row table with the following fields:
 \itemize{
-  \item \code{alpha_code}: Species identifier.
-  \item \code{total_cells}: Total raster cell count.
-  \item \code{valid_cells}: Non-NA cell count.
-  \item \code{positive_cells}: Count of cells > 0.
-  \item \code{negative_cells}: Count of cells < 0.
-  \item \code{zero_cells}: Count of cells == 0.
-  \item \code{percent_positive}: Percentage of positive cells.
-  \item \code{percent_negative}: Percentage of negative cells.
-  \item \code{percent_zero}: Percentage of zero cells.
-  \item \code{percent_sum}: Sum of percentages.
-  \item \code{extent_area_km2}: Total raster extent area in km^2.
-  \item \code{raster_path}: Source raster file path.
-  \item \code{computed_at_utc}: UTC timestamp of computation.
+\item \code{alpha_code}: Species identifier.
+\item \code{total_cells}: Total raster cell count.
+\item \code{valid_cells}: Non-NA cell count.
+\item \code{positive_cells}: Count of cells > 0.
+\item \code{negative_cells}: Count of cells < 0.
+\item \code{zero_cells}: Count of cells == 0.
+\item \code{percent_positive}: Percentage of positive cells.
+\item \code{percent_negative}: Percentage of negative cells.
+\item \code{percent_zero}: Percentage of zero cells.
+\item \code{percent_sum}: Sum of percentages.
+\item \code{extent_area_km2}: Total raster extent area in km^2.
+\item \code{raster_path}: Source raster file path.
+\item \code{computed_at_utc}: UTC timestamp of computation.
 }
 
 Side effects:
 \itemize{
-  \item Writes CSV summary file to disk.
-  \item Appends processing summary to \code{_log.txt}.
+\item Writes CSV summary file to disk.
+\item Appends processing summary to \code{_log.txt}.
 }
 }
 \description{
@@ -41,37 +41,37 @@ the full modeled extent.
 \details{
 \strong{Inputs}
 \itemize{
-  \item Species identifier provided as \code{alpha_code}.
-  \item A suitability trend raster stored in the project directory.
+\item Species identifier provided as \code{alpha_code}.
+\item A suitability trend raster stored in the project directory.
 }
 
 \strong{Outputs}
 \itemize{
-  \item CSV summary file written to:
-        \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-        \code{<alpha_code>-Suitability-Trend-Percentages.csv}
-  \item Processing summary appended to:
-        \code{<project_dir>/runs/<alpha_code>/}
-        \code{_log.txt}
+\item CSV summary file written to:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend-Percentages.csv}
+\item Processing summary appended to:
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Methods}
 \itemize{
-  \item Reads the suitability trend raster, preferring GeoTIFF and
-        falling back to ASCII grid:
-        \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-        \code{<alpha_code>-Suitability-Trend.(tif|asc)}
-  \item Computes counts and percentages of positive (>0), negative (<0),
-        and zero (=0) cells over the full raster extent.
-  \item Excludes NA cells from percentage denominators.
-  \item Computes extent area (km^2) using \code{terra::cellSize}
-        (in m^2), converted to km^2.
+\item Reads the suitability trend raster, preferring GeoTIFF and
+falling back to ASCII grid:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.(tif|asc)}
+\item Computes counts and percentages of positive (>0), negative (<0),
+and zero (=0) cells over the full raster extent.
+\item Excludes NA cells from percentage denominators.
+\item Computes extent area (km^2) using \code{terra::cellSize}
+(in m^2), converted to km^2.
 }
 
 \strong{Data requirements}
 \itemize{
-  \item Raster must contain numeric trend values.
-  \item Raster must exist in either GeoTIFF or ASCII grid format.
+\item Raster must contain numeric trend values.
+\item Raster must exist in either GeoTIFF or ASCII grid format.
 }
 
 Timestamp in CSV and log is UTC. All file paths are constructed

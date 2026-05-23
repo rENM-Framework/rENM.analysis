@@ -13,17 +13,17 @@ coerced to upper case.}
 \value{
 Invisibly returns a List with:
 \itemize{
-  \item long: Data frame of all variable contributions by year
-  \item wide_summary: Data frame of summary statistics and per-year columns
-  \item saved_csv: Character path to the output CSV
-  \item log_path: Character path to the appended log file
+\item long: Data frame of all variable contributions by year
+\item wide_summary: Data frame of summary statistics and per-year columns
+\item saved_csv: Character path to the output CSV
+\item log_path: Character path to the appended log file
 }
 
 Side effects:
 \itemize{
-  \item Writes a consolidated CSV file to disk
-  \item Appends a detailed processing summary (with per-year lines) to
-  \code{_log.txt}
+\item Writes a consolidated CSV file to disk
+\item Appends a detailed processing summary (with per-year lines) to
+\code{_log.txt}
 }
 }
 \description{
@@ -34,46 +34,46 @@ appends a detailed processing log with per-year results.
 \details{
 \strong{Inputs}
 \itemize{
-  \item Ranked variable importance files (PI-Ranked):
-  \code{<project_dir>/runs/<alpha_code>/TimeSeries/<year>/model/}
-  \code{<alpha_code>-<year>-PI-Ranked.txt}
-  \item Years processed: 1980, 1985, ..., 2020
+\item Ranked variable importance files (PI-Ranked):
+\code{<project_dir>/runs/<alpha_code>/TimeSeries/<year>/model/}
+\code{<alpha_code>-<year>-PI-Ranked.txt}
+\item Years processed: 1980, 1985, ..., 2020
 }
 
 \strong{Outputs}
 \itemize{
-  \item Consolidated CSV:
-  \code{<project_dir>/runs/<alpha_code>/Trends/variables/}
-  \code{<alpha_code>-Variables-AllYears.csv}
-  \item Processing log appended to:
-  \code{<project_dir>/runs/<alpha_code>/}
-  \code{_log.txt}
+\item Consolidated CSV:
+\code{<project_dir>/runs/<alpha_code>/Trends/variables/}
+\code{<alpha_code>-Variables-AllYears.csv}
+\item Processing log appended to:
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Methods}
 \itemize{
-  \item Reads per-span ranked variable importance files across years
-  \item Tolerates tab, comma, and whitespace-delimited formats
-  \item Uses heuristics to identify Variable and Percent columns
-  \item Cleans and converts percentage values
-  \item Aggregates results into long and wide formats
-  \item Computes summary statistics:
-  \itemize{
-    \item n_years
-    \item mean_pct
-    \item median_pct
-    \item sd_pct
-    \item min_pct
-    \item max_pct
-  }
-  \item Writes a consolidated CSV and logs per-year processing status
+\item Reads per-span ranked variable importance files across years
+\item Tolerates tab, comma, and whitespace-delimited formats
+\item Uses heuristics to identify Variable and Percent columns
+\item Cleans and converts percentage values
+\item Aggregates results into long and wide formats
+\item Computes summary statistics:
+\itemize{
+\item n_years
+\item mean_pct
+\item median_pct
+\item sd_pct
+\item min_pct
+\item max_pct
+}
+\item Writes a consolidated CSV and logs per-year processing status
 }
 
 \strong{Data requirements}
 \itemize{
-  \item Input files must exist for one or more modeled years
-  \item Files must contain variable and percent contribution columns
-  \item Missing or malformed files are tolerated and logged
+\item Input files must exist for one or more modeled years
+\item Files must contain variable and percent contribution columns
+\item Missing or malformed files are tolerated and logged
 }
 }
 \examples{

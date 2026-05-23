@@ -88,14 +88,14 @@
 #' }
 #'
 #' @importFrom sf st_read st_make_valid st_crs st_transform st_union st_bbox
-#'   st_geometry st_crop st_point_on_surface st_sf st_area st_is_empty
-#'   st_collection_extract
+#' @importFrom sf st_geometry st_crop st_point_on_surface st_sf st_area st_is_empty
+#' @importFrom sf st_collection_extract
 #' @importFrom terra rast same.crs vect project ext mask crop cellSize global
-#'   ncell ifel as.data.frame
+#' @importFrom terra ncell ifel as.data.frame
 #' @importFrom dplyr bind_rows
 #' @importFrom ggplot2 ggplot geom_raster aes scale_fill_gradient2 geom_sf
-#'   geom_sf_text coord_sf labs theme_void theme element_rect element_text
-#'   ggsave theme_minimal
+#' @importFrom ggplot2 geom_sf_text coord_sf labs theme_void theme element_rect element_text
+#' @importFrom ggplot2 ggsave theme_minimal
 #' @importFrom grid unit
 #' @importFrom rlang .data
 #' @importFrom utils write.csv

@@ -13,17 +13,17 @@ in file paths, titles, and outputs.}
 \value{
 Invisibly returns a List with:
 \itemize{
-  \item plot: ggplot object of the final map
-  \item table: data.frame of per-state metrics
-  \item csv: Character path to the saved CSV
-  \item png: Character path to the saved PNG
-  \item log: Character path to the appended log file
+\item plot: ggplot object of the final map
+\item table: data.frame of per-state metrics
+\item csv: Character path to the saved CSV
+\item png: Character path to the saved PNG
+\item log: Character path to the appended log file
 }
 
 Side effects:
 \itemize{
-  \item Writes CSV and PNG outputs to disk
-  \item Appends a processing summary to \code{_log.txt}
+\item Writes CSV and PNG outputs to disk
+\item Appends a processing summary to \code{_log.txt}
 }
 }
 \description{
@@ -34,66 +34,66 @@ Results include tabular summaries, visualization, and logging.
 \details{
 \strong{Inputs}
 \itemize{
-  \item U.S. state boundaries:
-  \code{<project_dir>/data/shapefiles/tl_2012_us_state/}
-  \code{tl_2012_us_state.shp}
-  \item GAP range shapefile:
-  \code{<project_dir>/data/shapefiles/}
-  \code{b<alpha_code>x_CONUS_Range_2001v1/}
-  \code{b<alpha_code>x_CONUS_Range_2001v1.shp}
-  \item Suitability trend raster:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend.tif}
+\item U.S. state boundaries:
+\code{<project_dir>/data/shapefiles/tl_2012_us_state/}
+\code{tl_2012_us_state.shp}
+\item GAP range shapefile:
+\code{<project_dir>/data/shapefiles/}
+\code{b<alpha_code>x_CONUS_Range_2001v1/}
+\code{b<alpha_code>x_CONUS_Range_2001v1.shp}
+\item Suitability trend raster:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.tif}
 }
 
 \strong{Outputs}
 \itemize{
-  \item CSV summary:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend-State-Analysis.csv}
-  \item PNG map:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend-State-Analysis.png}
-  \item Processing summary appended to:
-  \code{<project_dir>/runs/<alpha_code>/}
-  \code{_log.txt}
+\item CSV summary:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend-State-Analysis.csv}
+\item PNG map:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend-State-Analysis.png}
+\item Processing summary appended to:
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Methods}
 \itemize{
-  \item Filter to CONUS-only states and clip the GAP range to CONUS
-  \item Identify states intersecting the GAP range
-  \item Compute per-state metrics:
-  \itemize{
-    \item \code{GAP.RANGE.AREA} (km^2): GAP area within the state
-    (vector area in EPSG:5070)
-    \item \code{GAP.RANGE.PCT} (percent): share of total CONUS GAP
-    area
-    \item \code{GAP.RANGE.POS.PCT} (percent): share of the state's GAP
-    area with positive trend (raster > 0)
-    \item \code{GAP.RANGE.NEG.PCT} (percent): share with negative
-    trend (raster < 0)
-  }
-  \item Map construction includes:
-  \itemize{
-    \item Underlay of trend raster
-    \item Dashed GAP outline
-    \item Highlighting intersecting states
-    \item State labeling
-    \item Cropping to intersection extent
-  }
-  \item Log: append a 72-dash processing summary block with aligned
-  fields including Timestamp, Alpha code, Raster source,
-  Total/Valid/Positive/Negative/Zero cells, Outputs saved,
-  Total elapsed, and Output file
+\item Filter to CONUS-only states and clip the GAP range to CONUS
+\item Identify states intersecting the GAP range
+\item Compute per-state metrics:
+\itemize{
+\item \code{GAP.RANGE.AREA} (km^2): GAP area within the state
+(vector area in EPSG:5070)
+\item \code{GAP.RANGE.PCT} (percent): share of total CONUS GAP
+area
+\item \code{GAP.RANGE.POS.PCT} (percent): share of the state's GAP
+area with positive trend (raster > 0)
+\item \code{GAP.RANGE.NEG.PCT} (percent): share with negative
+trend (raster < 0)
+}
+\item Map construction includes:
+\itemize{
+\item Underlay of trend raster
+\item Dashed GAP outline
+\item Highlighting intersecting states
+\item State labeling
+\item Cropping to intersection extent
+}
+\item Log: append a 72-dash processing summary block with aligned
+fields including Timestamp, Alpha code, Raster source,
+Total/Valid/Positive/Negative/Zero cells, Outputs saved,
+Total elapsed, and Output file
 }
 
 \strong{Data requirements}
 \itemize{
-  \item State shapefile must include the \code{STUSPS} column
-  \item Raster and vector data must share compatible CRS or be
-  transformable
-  \item GAP range geometry must be valid and non-empty
+\item State shapefile must include the \code{STUSPS} column
+\item Raster and vector data must share compatible CRS or be
+transformable
+\item GAP range geometry must be valid and non-empty
 }
 }
 \examples{

@@ -27,9 +27,9 @@ for Bayesian intercept, or NULL (default) to disable.}
 \value{
 Invisibly returns NULL. Side effects:
 \itemize{
-  \item Writes multiple PNG plots to disk
-  \item Writes CSV files containing LR and BR statistics
-  \item Appends a processing summary to \code{_log.txt}
+\item Writes multiple PNG plots to disk
+\item Writes CSV files containing LR and BR statistics
+\item Appends a processing summary to \code{_log.txt}
 }
 }
 \description{
@@ -44,56 +44,56 @@ rENM_project_dir().
 
 \strong{Input}
 \itemize{
-  \item File:
-  \code{<project_dir>/runs/<alpha_code>/Trends/variables/}
-  \code{<alpha_code>-Variables-AllYears.csv}
+\item File:
+\code{<project_dir>/runs/<alpha_code>/Trends/variables/}
+\code{<alpha_code>-Variables-AllYears.csv}
 }
 
 \strong{Processing rules}
 \itemize{
-  \item Eligibility rule (2025-09): Only variables that appear
-  (non-NA contribution) in 3 or more of the years 1980-2020 are
-  considered for \code{top_n} ranking and plotting.
-  \item Adds Region of Practical Equivalence (ROPE) calculations
-  for the Bayesian slope (and optional intercept).
+\item Eligibility rule (2025-09): Only variables that appear
+(non-NA contribution) in 3 or more of the years 1980-2020 are
+considered for \code{top_n} ranking and plotting.
+\item Adds Region of Practical Equivalence (ROPE) calculations
+for the Bayesian slope (and optional intercept).
 }
 
 \strong{Outputs}
 \itemize{
-  \item Multiple PNG visualizations:
-  \itemize{
-    \item Heatmap
-    \item Line plots
-    \item Frequentist linear regression (lines and points)
-    \item Bayesian regression (lines and points, with and without ribbon)
-  }
-  \item CSV summaries:
-  \itemize{
-    \item Linear regression statistics
-    \item Bayesian regression statistics (including ROPE metrics)
-  }
-  \item Processing summary appended to:
-  \code{<project_dir>/runs/<alpha_code>/}
-  \code{_log.txt}
+\item Multiple PNG visualizations:
+\itemize{
+\item Heatmap
+\item Line plots
+\item Frequentist linear regression (lines and points)
+\item Bayesian regression (lines and points, with and without ribbon)
+}
+\item CSV summaries:
+\itemize{
+\item Linear regression statistics
+\item Bayesian regression statistics (including ROPE metrics)
+}
+\item Processing summary appended to:
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Methods}
 \itemize{
-  \item Variable selection based on mean contribution and eligibility rule
-  \item Frequentist linear regression (LR) across years
-  \item Bayesian regression (BR) with posterior summaries
-  \item ROPE calculations:
-  \itemize{
-    \item Probability mass within ROPE
-    \item Decision classification: inside, outside, overlaps
-  }
+\item Variable selection based on mean contribution and eligibility rule
+\item Frequentist linear regression (LR) across years
+\item Bayesian regression (BR) with posterior summaries
+\item ROPE calculations:
+\itemize{
+\item Probability mass within ROPE
+\item Decision classification: inside, outside, overlaps
+}
 }
 
 \strong{Data requirements}
 \itemize{
-  \item Input CSV must exist and contain per-year contribution columns
-  \item Years must span 1980-2020 in 5-year increments
-  \item Variables must have sufficient non-NA observations for inclusion
+\item Input CSV must exist and contain per-year contribution columns
+\item Years must span 1980-2020 in 5-year increments
+\item Variables must have sufficient non-NA observations for inclusion
 }
 }
 \examples{

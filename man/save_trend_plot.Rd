@@ -19,9 +19,9 @@ to the saved PNG output.
 
 Side effects:
 \itemize{
-  \item Writes a PNG file to the Trends/suitability directory
-  \item Creates the output directory if it does not exist
-  \item Writes progress messages to the console
+\item Writes a PNG file to the Trends/suitability directory
+\item Creates the output directory if it does not exist
+\item Writes progress messages to the console
 }
 }
 \description{
@@ -43,7 +43,7 @@ to follow the naming pattern:
 or
 \code{<alpha_code>-<NAME>.asc}
 
-where <NAME> represents a descriptive identifier for the trend surface.
+where \if{html}{\out{<NAME>}} represents a descriptive identifier for the trend surface.
 
 \strong{Outputs}:
 The PNG file is written to:
@@ -55,7 +55,7 @@ using the filename:
 
 \code{<alpha_code>-<NAME>.png}
 
-where <NAME> is derived from the input raster filename. For example,
+where \if{html}{\out{<NAME>}} is derived from the input raster filename. For example,
 an input file named:
 
 CASP-Suitability-Difference-Trend.tif
@@ -64,7 +64,7 @@ will produce:
 
 CASP-Suitability-Difference-Trend.png
 
-If the function cannot confidently extract <NAME> from the input path
+If the function cannot confidently extract \if{html}{\out{<NAME>}} from the input path
 (for example, when a raster object is supplied instead of a file path),
 it falls back to:
 
@@ -97,5 +97,5 @@ with \code{plot_trend()}.
 
 }
 \seealso{
-[plot_trend()], [find_suitability_trend()]
+\code{\link[=plot_trend]{plot_trend()}}, \code{\link[=find_suitability_trend]{find_suitability_trend()}}
 }

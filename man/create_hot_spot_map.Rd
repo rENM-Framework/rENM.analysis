@@ -11,8 +11,8 @@ create_hot_spot_map(alpha_code)
 }
 \value{
 Invisible list with \code{plot} (ggplot), \code{png} (file path),
-  and \code{stats} (CSV path). Primary side effects are the PNG and CSV
-  files written to disk and a log entry.
+and \code{stats} (CSV path). Primary side effects are the PNG and CSV
+files written to disk and a log entry.
 }
 \description{
 Build a publication-ready hot-spot map identifying areas where declining
@@ -28,10 +28,10 @@ positive.
 
 Per-state statistics:
 \itemize{
-  \item Hot-spot area (km\eqn{^2}) within each intersecting state.
-  \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
-    where the denominator is the state area clipped to the raster
-    footprint (to avoid inflating percentages for partially covered states).
+\item Hot-spot area (km\eqn{^2}) within each intersecting state.
+\item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
+where the denominator is the state area clipped to the raster
+footprint (to avoid inflating percentages for partially covered states).
 }
 
 Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
@@ -40,8 +40,8 @@ intersecting with the GAP range. Input rasters are read from
 
 Outputs:
 \itemize{
-  \item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots.png}
-  \item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots-Stats.csv}
+\item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots.png}
+\item \code{<alpha_code>-Suitability-Trend-State-Analysis-Hotspots-Stats.csv}
 }
 A summary is appended to \code{<project_dir>/runs/<alpha_code>/_log.txt}.
 }

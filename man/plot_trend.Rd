@@ -21,14 +21,14 @@ the neutral region around zero in the color scaling. Values closer to
 \value{
 Invisibly returns a List with the following components:
 \itemize{
-  \item plot: ggplot object representing the trend map
-  \item lims: Numeric vector of length 2 defining color scale limits
-  \item n_cells: Integer number of non-NA raster cells plotted
+\item plot: ggplot object representing the trend map
+\item lims: Numeric vector of length 2 defining color scale limits
+\item n_cells: Integer number of non-NA raster cells plotted
 }
 
 Side effects:
 \itemize{
-  \item Writes progress messages to the console
+\item Writes progress messages to the console
 }
 }
 \description{
@@ -95,6 +95,6 @@ function will stop with an error.
 
 }
 \seealso{
-[find_suitability_trend()], [save_trend_plot()],
-  [get_species_info()]
+\code{\link[=find_suitability_trend]{find_suitability_trend()}}, \code{\link[=save_trend_plot]{save_trend_plot()}},
+\code{\link[rENM.core:get_species_info]{get_species_info()}}
 }

@@ -73,7 +73,7 @@
 #' @importFrom terra rast vect crs same.crs project ext nlyr as.data.frame
 #' @importFrom sf st_as_sf st_crs
 #' @importFrom ggplot2 ggplot geom_raster aes geom_sf scale_fill_gradient2 labs
-#'   coord_sf theme_minimal theme element_rect element_line element_text
+#' @importFrom ggplot2 coord_sf theme_minimal theme element_rect element_line element_text
 #' @importFrom stats quantile
 #'
 #' @examples

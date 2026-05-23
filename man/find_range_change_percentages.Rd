@@ -13,16 +13,16 @@ inputs and outputs.}
 \value{
 Invisibly returns a tibble with:
 \itemize{
-  \item counts: positive, negative, zero, and NA cells
-  \item percentages: percent positive, negative, and zero
-  \item area: total GAP range area in km^2
-  \item paths: raster and GAP shapefile paths
+\item counts: positive, negative, zero, and NA cells
+\item percentages: percent positive, negative, and zero
+\item area: total GAP range area in km^2
+\item paths: raster and GAP shapefile paths
 }
 
 Side effects:
 \itemize{
-  \item CSV written to disk
-  \item Processing summary appended to \code{_log.txt}
+\item CSV written to disk
+\item Processing summary appended to \code{_log.txt}
 }
 }
 \description{
@@ -33,69 +33,69 @@ summarized, written to disk, and logged.
 \details{
 \strong{Inputs}
 \itemize{
-  \item Species table:
-  \code{<project_dir>/data/}
-  \code{_species.csv}
-  \item GAP.RANGE shapefile resolved from entries such as:
-  \code{<project_dir>/data/shapefiles/<name>/}
-  \code{<name>.shp}
-  \item Suitability trend raster:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend.tif}
+\item Species table:
+\code{<project_dir>/data/}
+\code{_species.csv}
+\item GAP.RANGE shapefile resolved from entries such as:
+\code{<project_dir>/data/shapefiles/<name>/}
+\code{<name>.shp}
+\item Suitability trend raster:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.tif}
 }
 
 \strong{Outputs}
 \itemize{
-  \item CSV summary written to:
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend-GAP-Range-Percentages.csv}
-  \item Processing summary appended to:
-  \code{<project_dir>/runs/<alpha_code>/}
-  \code{_log.txt}
+\item CSV summary written to:
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend-GAP-Range-Percentages.csv}
+\item Processing summary appended to:
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
 }
 
 \strong{Methods}
 \itemize{
-  \item Raster is masked by the GAP range polygon
-  \item Percentages of positive (>0), negative (<0), and zero (=0)
-  values are computed among non-NA cells
-  \item Denominator for percentages is the number of non-NA cells
-  inside the GAP range
-  \item Zeros are reported separately
-  \item Area is computed using EPSG:6933 (World Cylindrical Equal
-  Area)
+\item Raster is masked by the GAP range polygon
+\item Percentages of positive (>0), negative (<0), and zero (=0)
+values are computed among non-NA cells
+\item Denominator for percentages is the number of non-NA cells
+inside the GAP range
+\item Zeros are reported separately
+\item Area is computed using EPSG:6933 (World Cylindrical Equal
+Area)
 }
 
 \strong{Data requirements}
 \itemize{
-  \item GAP.RANGE must resolve to a valid shapefile path
-  \item Raster and vector data must be readable by
-  \code{terra::rast} and \code{sf::read_sf}
+\item GAP.RANGE must resolve to a valid shapefile path
+\item Raster and vector data must be readable by
+\code{terra::rast} and \code{sf::read_sf}
 }
 
 For a given species \code{alpha_code}, this function:
 \itemize{
-  \item Reads \code{<project_dir>/data/_species.csv} to locate the
-  GAP.RANGE shapefile reference
-  \item Resolves the GAP.RANGE shapefile path, including common
-  layouts such as
-  \code{<project_dir>/data/shapefiles/<name>/<name>.shp}
-  \item Reads the species suitability trend raster at
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend.tif}
-  \item Masks the raster by the GAP range polygon and computes the
-  percentage of positive (>0), negative (<0), and zero (=0) cells
-  among non-NA cells
-  \item Computes total GAP range area (km^2) in an equal-area CRS
-  (EPSG:6933)
-  \item Writes a CSV summary to
-  \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-  \code{<alpha_code>-Suitability-Trend-GAP-Range-Percentages.csv}
-  \item Appends a processing summary to
-  \code{<project_dir>/runs/<alpha_code>/}
-  \code{_log.txt}
-  using the standard format (72-dash separator; labeled header;
-  aligned fields; no "Notes")
+\item Reads \code{<project_dir>/data/_species.csv} to locate the
+GAP.RANGE shapefile reference
+\item Resolves the GAP.RANGE shapefile path, including common
+layouts such as
+\code{<project_dir>/data/shapefiles/<name>/<name>.shp}
+\item Reads the species suitability trend raster at
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend.tif}
+\item Masks the raster by the GAP range polygon and computes the
+percentage of positive (>0), negative (<0), and zero (=0) cells
+among non-NA cells
+\item Computes total GAP range area (km^2) in an equal-area CRS
+(EPSG:6933)
+\item Writes a CSV summary to
+\code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Trend-GAP-Range-Percentages.csv}
+\item Appends a processing summary to
+\code{<project_dir>/runs/<alpha_code>/}
+\code{_log.txt}
+using the standard format (72-dash separator; labeled header;
+aligned fields; no "Notes")
 }
 }
 \examples{

@@ -13,15 +13,15 @@ input and output paths.}
 \value{
 List with the following components:
 \itemize{
-  \item \code{stack}: SpatRaster of prediction layers
-  \item \code{diff}: SpatRaster of consecutive differences
-  \item \code{ts_pred}: SpatRaster of Theil-Sen trend on predictions
-  \item \code{ts_diff}: SpatRaster of Theil-Sen trend on differences
+\item \code{stack}: SpatRaster of prediction layers
+\item \code{diff}: SpatRaster of consecutive differences
+\item \code{ts_pred}: SpatRaster of Theil-Sen trend on predictions
+\item \code{ts_diff}: SpatRaster of Theil-Sen trend on differences
 }
 Side effects:
 \itemize{
-  \item Writes GeoTIFF and ASCII raster outputs to disk
-  \item Removes GDAL sidecar files if present
+\item Writes GeoTIFF and ASCII raster outputs to disk
+\item Removes GDAL sidecar files if present
 }
 }
 \description{
@@ -32,51 +32,51 @@ change over time (i.e., acceleration or deceleration).
 \details{
 \strong{Inputs}
 \itemize{
-  \item GeoTIFF prediction layers located at:
-  \code{<project_dir>/runs/<alpha_code>/TimeSeries/<year>/model/}
-  \code{<alpha_code>-<year>-Prediction.tif}
-  \item Years included: 1980-2020 in 5-year steps
+\item GeoTIFF prediction layers located at:
+\code{<project_dir>/runs/<alpha_code>/TimeSeries/<year>/model/}
+\code{<alpha_code>-<year>-Prediction.tif}
+\item Years included: 1980-2020 in 5-year steps
 }
 
 \strong{Processing}
 \itemize{
-  \item Creates a multi-layer prediction stack across all available years
-  \item Creates a difference stack of consecutive layers:
-  \code{year[i + 1] - year[i]}
-  \item Computes robust Theil-Sen per-pixel trend layers:
-  \itemize{
-    \item \code{ts_pred}: trend across prediction stack
-    \item \code{ts_diff}: trend across difference stack
-  }
-  \item \code{ts_diff} represents the suitability change trend
-  (rate-of-change in suitability over time)
+\item Creates a multi-layer prediction stack across all available years
+\item Creates a difference stack of consecutive layers:
+\code{year[i + 1] - year[i]}
+\item Computes robust Theil-Sen per-pixel trend layers:
+\itemize{
+\item \code{ts_pred}: trend across prediction stack
+\item \code{ts_diff}: trend across difference stack
+}
+\item \code{ts_diff} represents the suitability change trend
+(rate-of-change in suitability over time)
 }
 
 \strong{Methods}
 \itemize{
-  \item The Theil-Sen slope is computed per pixel as the median of all
-  pairwise slopes across time:
-  \itemize{
-    \item \eqn{median((y_j - y_i) / (t_j - t_i))} for \eqn{i < j}
-  }
+\item The Theil-Sen slope is computed per pixel as the median of all
+pairwise slopes across time:
+\itemize{
+\item \eqn{median((y_j - y_i) / (t_j - t_i))} for \eqn{i < j}
+}
 }
 
 \strong{Outputs}
 \itemize{
-  \item Writes \code{ts_diff} (suitability change trend) to:
-  \itemize{
-    \item \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-    \code{<alpha_code>-Suitability-Change-Trend.tif}
-    \item \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-    \code{<alpha_code>-Suitability-Change-Trend.asc}
-  }
-  \item Removes GDAL sidecar files (.aux.xml, .prj) if created
+\item Writes \code{ts_diff} (suitability change trend) to:
+\itemize{
+\item \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Change-Trend.tif}
+\item \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
+\code{<alpha_code>-Suitability-Change-Trend.asc}
+}
+\item Removes GDAL sidecar files (.aux.xml, .prj) if created
 }
 
 \strong{Data requirements}
 \itemize{
-  \item At least two prediction layers must be present
-  \item Missing yearly files are tolerated with warnings
+\item At least two prediction layers must be present
+\item Missing yearly files are tolerated with warnings
 }
 }
 \examples{
