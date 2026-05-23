@@ -1,13 +1,13 @@
 Package: rENM.analysis
 Type: Package
-Title: Analysis tools for the rENM framework
+Title: Analysis tools for the rENM Framework
 Version: 0.1.0.9000
 Authors@R: person(given = "John L.", family = "Schnase",
     email = "rENM.Framework@gmail.com",
     role = c("aut", "cre"),
     comment = c(ORCID = "0000-0001-7473-3977"))
 Description: Provides post-modeling analysis tools for the rENM
-    framework, including Theil-Sen suitability trend computation, weighted
+    Framework, including Theil-Sen suitability trend computation, weighted
     centroid tracking, bioclimatic velocity estimation, hotspot detection,
     range change quantification, and variable contribution summaries
     across the rENM time series.
