@@ -18,7 +18,8 @@ Roxygen: list(markdown = TRUE)
 URL: https://github.com/rENM-Framework/rENM.analysis
 BugReports: https://github.com/rENM-Framework/rENM.analysis/issues
 Suggests:
-  ggtext
+  ggtext,
+  ggthemes
 Imports:
   rENM.core,
   bayestestR,
