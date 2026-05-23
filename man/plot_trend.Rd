@@ -96,5 +96,5 @@ function will stop with an error.
 }
 \seealso{
 \code{\link[=find_suitability_trend]{find_suitability_trend()}}, \code{\link[=save_trend_plot]{save_trend_plot()}},
-\code{\link[rENM.core:get_species_info]{get_species_info()}}
+\code{\link[rENM.core:get_species_info]{rENM.core::get_species_info()}}
 }
