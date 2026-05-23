@@ -66,5 +66,5 @@ A summary block is appended to
 
 }
 \seealso{
-\code{\link{find_weighted_centroid}}, \code{\link{rENM_project_dir}}
+\code{\link{find_weighted_centroid}}, \code{\link[rENM.core]{rENM_project_dir}}
 }

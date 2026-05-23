@@ -1,24 +1,19 @@
 # rENM.analysis
 
-![rENM](https://img.shields.io/badge/rENM-framework-blue)
-![module](https://img.shields.io/badge/module-analysis-informational)
+![rENM](https://img.shields.io/badge/rENM-framework-blue) ![module](https://img.shields.io/badge/module-analysis-informational)
 
 **Trend analysis and derived metrics for the rENM Framework**
 
 ## Overview
 
-`rENM.analysis` computes the core analytical products of the rENM Framework.
-It transforms modeled suitability outputs into interpretable trends, spatial
-metrics, and ecological signals.
+`rENM.analysis` computes the core analytical products of the rENM Framework. It transforms modeled suitability outputs into interpretable trends, spatial metrics, and ecological signals.
 
-This package depends on `rENM.core` for project-directory resolution and
-species metadata access. All functions accept an optional `project_dir`
-argument; see `?rENM_project_dir` for configuration options.
+This package depends on `rENM.core` for project-directory resolution and species metadata access. All functions accept an optional `project_dir` argument; see `?rENM_project_dir` for configuration options.
 
 ## Key functions
 
 | Function | Description |
-|---|---|
+|------------------------------------|------------------------------------|
 | `find_suitability_trend()` | Compute per-cell Theil-Sen trends and Mann-Kendall statistics |
 | `find_suitability_change_trend()` | Compute trends in suitability rate-of-change (acceleration/deceleration) |
 | `find_trend_percentages()` | Summarize positive, negative, and zero trend proportions |
@@ -40,7 +35,7 @@ argument; see `?rENM_project_dir` for configuration options.
 
 ## Installation
 
-```r
+``` r
 # From GitHub
 devtools::install_github("rENM-Framework/rENM.analysis")
 
@@ -50,10 +45,9 @@ devtools::install_local("rENM.analysis")
 
 ## Getting started
 
-Set up a project directory and generate modeled suitability surfaces first
-(see `rENM.model`), then run the analysis pipeline in order:
+Set up a project directory and generate modeled suitability surfaces first (see `rENM.model`), then run the analysis pipeline in order:
 
-```r
+``` r
 library(rENM.analysis)
 
 proj <- "/path/to/your/rENM/project"
@@ -81,10 +75,9 @@ gather_variable_contributions("CASP")
 summarize_variable_contributions("CASP")
 ```
 
-For interactive work, configure the project directory once per session to
-avoid passing it to every function:
+For interactive work, configure the project directory once per session to avoid passing it to every function:
 
-```r
+``` r
 options(rENM.project_dir = "/path/to/your/rENM/project")
 
 find_suitability_trend("CASP")
@@ -94,7 +87,7 @@ find_weighted_centroid("CASP")
 
 ## Analysis pipeline
 
-```
+```         
 find_suitability_trend()
         ↓
 find_suitability_change_trend()
@@ -116,28 +109,22 @@ gather_variable_contributions()
 summarize_variable_contributions()
 ```
 
-Trend rasters are written to `<run_dir>/Trends/suitability/`. Centroid and
-velocity outputs go to `<run_dir>/Trends/centroids/`. Variable contribution
-summaries go to `<run_dir>/Trends/variables/`. All functions append a
-structured summary block to `<run_dir>/_log.txt`.
+Trend rasters are written to `<run_dir>/Trends/suitability/`. Centroid and velocity outputs go to `<run_dir>/Trends/centroids/`. Variable contribution summaries go to `<run_dir>/Trends/variables/`. All functions append a structured summary block to `<run_dir>/_log.txt`.
 
-## Role in the rENM framework
+## Role in the rENM Framework
 
 `rENM.analysis` is the fourth stage in the pipeline:
 
-```
+```         
 rENM.core → rENM.data → rENM.model → rENM.analysis → rENM.ai → rENM.reports
 ```
 
-It consumes the modeled suitability surfaces produced by `rENM.model` and
-generates the quantitative trends, spatial metrics, and derived signals
-consumed by `rENM.ai` and `rENM.reports`.
+It consumes the modeled suitability surfaces produced by `rENM.model` and generates the quantitative trends, spatial metrics, and derived signals consumed by `rENM.ai` and `rENM.reports`.
 
 ## License
 
 See `LICENSE` for details.
 
----
+------------------------------------------------------------------------
 
-**rENM Framework** — A modular system for reconstructing and analyzing
-long-term ecological niche dynamics.
+**rENM Framework** — A modular system for reconstructing and analyzing long-term ecological niche dynamics.

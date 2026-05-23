@@ -44,7 +44,7 @@
 #'   \code{outputs} (named list of file paths).
 #'   Primary side effects are six files written to disk and a log entry.
 #'
-#' @seealso \code{\link{find_weighted_centroid}}, \code{\link{rENM_project_dir}}
+#' @seealso \code{\link{find_weighted_centroid}}, \code{\link[rENM.core]{rENM_project_dir}}
 #' @importFrom bayestestR ci p_direction
 #' @importFrom rstanarm stan_glm posterior_epred
 #' @importFrom stats gaussian quantile
