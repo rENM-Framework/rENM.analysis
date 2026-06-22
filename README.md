@@ -1,6 +1,6 @@
 # rENM.analysis
 
-![rENM](https://img.shields.io/badge/rENM-framework-blue) ![module](https://img.shields.io/badge/module-analysis-informational)
+![rENM](https://img.shields.io/badge/rENM-framework-blue) ![module](https://img.shields.io/badge/module-analysis-informational)[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.20798280.svg)](https://doi.org/10.5281/zenodo.20798280)
 
 **Trend analysis and derived metrics for the rENM Framework**
 
