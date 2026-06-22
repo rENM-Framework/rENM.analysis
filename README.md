@@ -37,10 +37,10 @@ This package depends on `rENM.core` for project-directory resolution and species
 
 ``` r
 # From GitHub
-devtools::install_github("rENM-Framework/rENM.analysis")
+remotes::install_github("rENM-Framework/rENM.analysis")
 
 # From a local source directory
-devtools::install_local("rENM.analysis")
+remotes::install_local("rENM.analysis")
 ```
 
 ## Getting started
