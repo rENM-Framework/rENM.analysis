@@ -35,7 +35,12 @@ footprint (to avoid inflating percentages for partially covered states).
 }
 
 Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
-intersecting with the GAP range. Input rasters are read from
+intersecting with the GAP range. A state must also intersect the modeling
+extent (\code{<project_dir>/runs/<alpha_code>/_occs/extent.txt}, written by
+\code{find_occurrence_extent()}, \code{find_range_extent()}, or
+\code{set_extent()}) to be included in the per-state map/labels/stats,
+since GAP.RANGE is an independently-sourced polygon that can extend beyond
+the trend raster's actual data footprint. Input rasters are read from
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}.
 
 Outputs:

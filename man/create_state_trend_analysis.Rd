@@ -44,6 +44,12 @@ Results include tabular summaries, visualization, and logging.
 \item Suitability trend raster:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 \code{<alpha_code>-Suitability-Trend.tif}
+\item Modeling extent:
+\code{<project_dir>/runs/<alpha_code>/_occs/extent.txt}
+(written by \code{find_occurrence_extent()},
+\code{find_range_extent()}, or \code{set_extent()}; this is the
+bounding box used to crop the predictor variables that produced
+the trend raster, i.e. the raster's real data footprint)
 }
 
 \strong{Outputs}
@@ -62,7 +68,16 @@ Results include tabular summaries, visualization, and logging.
 \strong{Methods}
 \itemize{
 \item Filter to CONUS-only states and clip the GAP range to CONUS
-\item Identify states intersecting the GAP range
+\item Identify states intersecting both the GAP range and the
+modeling extent (\code{extent.txt}). Requiring both avoids
+selecting states that fall within the official GAP range polygon
+but outside the trend raster's actual data footprint, which would
+otherwise cause the per-state raster crop to fail with a
+"extents do not overlap" error. A state that unexpectedly ends up
+with no raster overlap (e.g. a stale \code{extent.txt}) still
+falls back safely: \code{GAP.RANGE.POS.PCT}/\code{GAP.RANGE.NEG.PCT}
+are reported as \code{NA} for that state rather than aborting
+the run
 \item Compute per-state metrics:
 \itemize{
 \item \code{GAP.RANGE.AREA} (km^2): GAP area within the state
@@ -94,6 +109,9 @@ Total elapsed, and Output file
 \item Raster and vector data must share compatible CRS or be
 transformable
 \item GAP range geometry must be valid and non-empty
+\item \code{extent.txt} must exist for the species run and contain
+parsable \code{Upper-left:} / \code{Lower-right:} \code{(lon, lat)}
+coordinates in EPSG:4326
 }
 }
 \examples{

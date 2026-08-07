@@ -1,3 +1,18 @@
+# rENM.analysis 0.2.0.9000
+
+* Fixed `create_state_trend_analysis()` erroring with `[crop] extents do not
+  overlap` for species whose trend raster's real data footprint (the
+  modeling extent used to crop predictor variables) is smaller than the
+  GAP.RANGE polygon. State selection now requires intersecting both
+  GAP.RANGE and `_occs/extent.txt`, and the per-state raster crop falls back
+  to `NA` trend percentages (rather than aborting) if a selected state still
+  has no raster overlap.
+* Fixed `create_hot_spot_map()` including states in its map labels and
+  per-state stats CSV that intersect the GAP.RANGE polygon but fall outside
+  the trend raster's actual modeling extent (same root cause as the
+  `create_state_trend_analysis()` fix above). State selection now also
+  requires intersecting `_occs/extent.txt`.
+
 # rENM.analysis 0.1.0
 
 * Initial release.

@@ -17,6 +17,12 @@
 #'   \item Suitability trend raster:
 #'   \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 #'   \code{<alpha_code>-Suitability-Trend.tif}
+#'   \item Modeling extent:
+#'   \code{<project_dir>/runs/<alpha_code>/_occs/extent.txt}
+#'   (written by \code{find_occurrence_extent()},
+#'   \code{find_range_extent()}, or \code{set_extent()}; this is the
+#'   bounding box used to crop the predictor variables that produced
+#'   the trend raster, i.e. the raster's real data footprint)
 #' }
 #'
 #' \strong{Outputs}
@@ -35,7 +41,16 @@
 #' \strong{Methods}
 #' \itemize{
 #'   \item Filter to CONUS-only states and clip the GAP range to CONUS
-#'   \item Identify states intersecting the GAP range
+#'   \item Identify states intersecting both the GAP range and the
+#'   modeling extent (\code{extent.txt}). Requiring both avoids
+#'   selecting states that fall within the official GAP range polygon
+#'   but outside the trend raster's actual data footprint, which would
+#'   otherwise cause the per-state raster crop to fail with a
+#'   "extents do not overlap" error. A state that unexpectedly ends up
+#'   with no raster overlap (e.g. a stale \code{extent.txt}) still
+#'   falls back safely: \code{GAP.RANGE.POS.PCT}/\code{GAP.RANGE.NEG.PCT}
+#'   are reported as \code{NA} for that state rather than aborting
+#'   the run
 #'   \item Compute per-state metrics:
 #'   \itemize{
 #'     \item \code{GAP.RANGE.AREA} (km^2): GAP area within the state
@@ -67,6 +82,9 @@
 #'   \item Raster and vector data must share compatible CRS or be
 #'   transformable
 #'   \item GAP range geometry must be valid and non-empty
+#'   \item \code{extent.txt} must exist for the species run and contain
+#'   parsable \code{Upper-left:} / \code{Lower-right:} \code{(lon, lat)}
+#'   coordinates in EPSG:4326
 #' }
 #'
 #' @param alpha_code Character. Scalar species code (e.g., "CASP") used
@@ -89,7 +107,7 @@
 #'
 #' @importFrom sf st_read st_make_valid st_crs st_transform st_union st_bbox
 #' @importFrom sf st_geometry st_crop st_point_on_surface st_sf st_area st_is_empty
-#' @importFrom sf st_collection_extract
+#' @importFrom sf st_collection_extract st_polygon st_sfc
 #' @importFrom terra rast same.crs vect project ext mask crop cellSize global
 #' @importFrom terra ncell ifel as.data.frame
 #' @importFrom dplyr bind_rows
@@ -169,6 +187,51 @@ create_state_trend_analysis <- function(alpha_code) {
     gap <- sf::st_transform(gap, sf::st_crs(states))
   }
 
+  # ---- Read modeling extent (extent.txt) ------------------------------------
+  # This is the actual bounding box used to crop the predictor variables that
+  # produced the Prediction/trend rasters (see get_merra_variables()), so it
+  # reflects the raster's real data footprint -- unlike GAP.RANGE, which is an
+  # independently-sourced range polygon that can extend beyond it.
+  message("==> Reading modeling extent (extent.txt)...")
+  extent_path <- file.path(project_dir, "runs", alpha_code, "_occs", "extent.txt")
+  if (!file.exists(extent_path)) {
+    stop(
+      "extent.txt not found at: ", extent_path, "\n",
+      "Run find_occurrence_extent(), find_range_extent(), or set_extent() first.",
+      call. = FALSE
+    )
+  }
+
+  parse_extent_pair <- function(s) {
+    m <- regexec("\\(([-0-9.]+)\\s*,\\s*([-0-9.]+)\\)", s, perl = TRUE)
+    v <- regmatches(s, m)
+    if (length(v) == 1L && length(v[[1L]]) == 3L) as.numeric(v[[1L]][2:3])
+    else c(NA_real_, NA_real_)
+  }
+
+  extent_txt <- readLines(extent_path, warn = FALSE)
+  extent_ul  <- parse_extent_pair(grep("Upper-left",  extent_txt, ignore.case = TRUE, value = TRUE)[1L])
+  extent_lr  <- parse_extent_pair(grep("Lower-right", extent_txt, ignore.case = TRUE, value = TRUE)[1L])
+  if (any(is.na(c(extent_ul, extent_lr)))) {
+    stop("Failed to parse coordinates from extent.txt: ", extent_path, call. = FALSE)
+  }
+
+  ext_xmin <- min(extent_ul[1L], extent_lr[1L]); ext_xmax <- max(extent_ul[1L], extent_lr[1L])
+  ext_ymin <- min(extent_ul[2L], extent_lr[2L]); ext_ymax <- max(extent_ul[2L], extent_lr[2L])
+
+  model_bbox_wgs84 <- sf::st_sfc(
+    sf::st_polygon(list(matrix(
+      c(ext_xmin, ext_ymin,
+        ext_xmax, ext_ymin,
+        ext_xmax, ext_ymax,
+        ext_xmin, ext_ymax,
+        ext_xmin, ext_ymin),
+      ncol = 2, byrow = TRUE
+    ))),
+    crs = 4326
+  )
+  model_bbox <- sf::st_transform(sf::st_sf(geometry = model_bbox_wgs84), sf::st_crs(states))
+
   trySuppressWarnings <- function(expr) {
     suppressWarnings(
       tryCatch(expr, error = function(e) NULL)
@@ -226,8 +289,13 @@ create_state_trend_analysis <- function(alpha_code) {
     sf::st_union(states_conus)
   )
 
-  idx <- sf::st_intersects(states_conus, gap_conus, sparse = FALSE)[, 1]
-  states_in_gap <- states_conus[idx, , drop = FALSE]
+  # A state must intersect both the GAP range AND the modeling extent to be
+  # included: the raster only has data inside the modeling extent, so a state
+  # that only touches GAP.RANGE outside that box would have no trend data and
+  # would fail the per-state crop below.
+  idx_gap   <- sf::st_intersects(states_conus, gap_conus,  sparse = FALSE)[, 1]
+  idx_model <- sf::st_intersects(states_conus, model_bbox, sparse = FALSE)[, 1]
+  states_in_gap <- states_conus[idx_gap & idx_model, , drop = FALSE]
 
   conus_bbox <- sf::st_bbox(
     sf::st_union(sf::st_geometry(states_in_gap), sf::st_geometry(gap_conus))
@@ -302,6 +370,27 @@ create_state_trend_analysis <- function(alpha_code) {
     pct_total   <- if (total_gap_m2 > 0) (area_gap_m2 / total_gap_m2) * 100 else 0
 
     gap_spat <- terra::vect(gap_state_eq)
+
+    # Defensive fallback: state selection is now filtered against the modeling
+    # extent, but guard here too in case extent.txt is stale relative to the
+    # raster actually on disk. terra::crop() errors (rather than returning an
+    # empty raster) when there is zero bounding-box overlap.
+    te <- as.vector(terra::ext(trend_eq))
+    ge <- as.vector(terra::ext(gap_spat))
+    overlaps <- !(ge["xmin"] > te["xmax"] || ge["xmax"] < te["xmin"] ||
+                  ge["ymin"] > te["ymax"] || ge["ymax"] < te["ymin"])
+
+    if (!isTRUE(overlaps)) {
+      return(data.frame(
+        STATE             = state_id,
+        GAP.RANGE.AREA    = round(area_gap_m2 / 1e6, 3),
+        GAP.RANGE.PCT     = round(pct_total, 3),
+        GAP.RANGE.POS.PCT = NA_real_,
+        GAP.RANGE.NEG.PCT = NA_real_,
+        stringsAsFactors  = FALSE
+      ))
+    }
+
     r_state  <- terra::mask(terra::crop(trend_eq, gap_spat), gap_spat)
     ca_state <- terra::mask(terra::crop(cell_area, gap_spat), gap_spat)
 

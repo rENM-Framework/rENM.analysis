@@ -20,7 +20,12 @@
 #' }
 #'
 #' Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
-#' intersecting with the GAP range. Input rasters are read from
+#' intersecting with the GAP range. A state must also intersect the modeling
+#' extent (\code{<project_dir>/runs/<alpha_code>/_occs/extent.txt}, written by
+#' \code{find_occurrence_extent()}, \code{find_range_extent()}, or
+#' \code{set_extent()}) to be included in the per-state map/labels/stats,
+#' since GAP.RANGE is an independently-sourced polygon that can extend beyond
+#' the trend raster's actual data footprint. Input rasters are read from
 #' \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}.
 #'
 #' Outputs:
@@ -141,14 +146,48 @@ create_hot_spot_map <- function(alpha_code) {
     gap <- sf::st_transform(gap, sf::st_crs(states))
   }
 
+  # ---- Read modeling extent (extent.txt) ----
+  # GAP.RANGE is an independently-sourced range polygon that can extend beyond
+  # the trend raster's actual data footprint (the modeling extent used to crop
+  # the predictor variables that produced it). A state that only touches
+  # GAP.RANGE outside that footprint has no real hot-spot data, so it must
+  # also intersect extent.txt to be included in the per-state output/labels.
+  extent_path <- file.path(project_dir, "runs", code, "_occs", "extent.txt")
+  if (!file.exists(extent_path)) {
+    stop(
+      "extent.txt not found at: ", extent_path, "\n",
+      "Run find_occurrence_extent(), find_range_extent(), or set_extent() first.",
+      call. = FALSE
+    )
+  }
+  parse_extent_pair <- function(s) {
+    m <- regexec("\\(([-0-9.]+)\\s*,\\s*([-0-9.]+)\\)", s, perl = TRUE)
+    v <- regmatches(s, m)
+    if (length(v) == 1L && length(v[[1L]]) == 3L) as.numeric(v[[1L]][2:3])
+    else c(NA_real_, NA_real_)
+  }
+  extent_txt <- readLines(extent_path, warn = FALSE)
+  extent_ul  <- parse_extent_pair(grep("Upper-left",  extent_txt, ignore.case = TRUE, value = TRUE)[1L])
+  extent_lr  <- parse_extent_pair(grep("Lower-right", extent_txt, ignore.case = TRUE, value = TRUE)[1L])
+  if (any(is.na(c(extent_ul, extent_lr)))) {
+    stop("Failed to parse coordinates from extent.txt: ", extent_path, call. = FALSE)
+  }
+  ext_xmin <- min(extent_ul[1L], extent_lr[1L]); ext_xmax <- max(extent_ul[1L], extent_lr[1L])
+  ext_ymin <- min(extent_ul[2L], extent_lr[2L]); ext_ymax <- max(extent_ul[2L], extent_lr[2L])
+  model_bbox_wgs84 <- sf::st_as_sfc(
+    sf::st_bbox(c(xmin = ext_xmin, ymin = ext_ymin, xmax = ext_xmax, ymax = ext_ymax), crs = 4326)
+  )
+  model_bbox <- sf::st_transform(model_bbox_wgs84, sf::st_crs(states))
+
   # ---- Crop, plot, save ----
   non_conus <- c("AK", "HI", "PR", "GU", "VI", "AS", "MP", "UM")
   states_conus <- dplyr::filter(states, !.data$STUSPS %in% non_conus)
   gap_conus <- suppressWarnings(
     sf::st_intersection(sf::st_union(gap), sf::st_union(states_conus))
   )
-  idx <- sf::st_intersects(states_conus, gap_conus, sparse = TRUE)
-  states_in_gap <- states_conus[lengths(idx) > 0, , drop = FALSE]
+  idx_gap   <- sf::st_intersects(states_conus, gap_conus,  sparse = TRUE)
+  idx_model <- sf::st_intersects(states_conus, model_bbox, sparse = TRUE)
+  states_in_gap <- states_conus[lengths(idx_gap) > 0 & lengths(idx_model) > 0, , drop = FALSE]
   raster_wkt <- terra::crs(trend_raster, proj = TRUE)
   states_conus_tr  <- sf::st_transform(states_conus,  raster_wkt)
   states_in_gap_tr <- sf::st_transform(states_in_gap, raster_wkt)
