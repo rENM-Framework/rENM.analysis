@@ -28,7 +28,9 @@ positive.
 
 Per-state statistics:
 \itemize{
-\item Hot-spot area (km\eqn{^2}) within each intersecting state.
+\item Hot-spot area (km\eqn{^2}) within the GAP range portion of each
+intersecting state (hot spots outside GAP range are excluded, since
+a hot spot is a subset of range by definition).
 \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
 where the denominator is the state area clipped to the raster
 footprint (to avoid inflating percentages for partially covered states).
