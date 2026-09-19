@@ -15,7 +15,10 @@
 #' \itemize{
 #'   \item Hot-spot area (km\eqn{^2}) within the GAP range portion of each
 #'     intersecting state (hot spots outside GAP range are excluded, since
-#'     a hot spot is a subset of range by definition).
+#'     a hot spot is a subset of range by definition). Cells straddling the
+#'     range boundary contribute only the fraction of their area that falls
+#'     inside it, so the total does not overshoot the range area where a
+#'     state holds only a few cells' worth of range.
 #'   \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
 #'     where the denominator is the state area clipped to the raster
 #'     footprint (to avoid inflating percentages for partially covered states).
@@ -49,7 +52,7 @@
 #' @importFrom sf st_read st_make_valid st_crs st_transform st_union st_intersection
 #' @importFrom sf st_intersects st_geometry st_point_on_surface st_bbox st_as_sfc st_sf
 #' @importFrom terra rast same.crs project compareGeom resample vect mask crop ext crs
-#' @importFrom terra cellSize expanse global
+#' @importFrom terra cellSize expanse global rasterize
 #' @importFrom dplyr filter bind_rows arrange desc
 #' @importFrom readr write_csv
 #'
@@ -321,10 +324,17 @@ create_hot_spot_map <- function(alpha_code) {
       )
       next
     }
-    st_gap_sv   <- terra::vect(st_gap_i)
-    hs_masked   <- terra::mask(hs,        st_gap_sv)
-    area_masked <- terra::mask(cell_km2,  st_gap_sv)
-    h_area <- terra::global(area_masked * (hs_masked == 1), "sum", na.rm = TRUE)[1, 1]
+    st_gap_sv <- terra::vect(st_gap_i)
+
+    # Each cell contributes only the fraction of its area that actually falls
+    # inside the GAP polygon. terra::mask() keeps a cell whenever its center
+    # is inside and the whole cell area would then be counted, so cells
+    # straddling the range boundary contribute area lying outside the range.
+    # At MERRA-2 resolution a small range portion spans only a handful of
+    # cells, and that overshoot was large enough to push reported hot-spot
+    # area above range area (Oregon, Pinyon Jay).
+    cov <- terra::rasterize(st_gap_sv, hs, cover = TRUE)
+    h_area <- terra::global(cell_km2 * cov * (hs == 1), "sum", na.rm = TRUE)[1, 1]
     if (is.na(h_area)) h_area <- 0
 
     pct <- if (state_area_km2 > 0) 100 * (h_area / state_area_km2) else NA_real_

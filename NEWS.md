@@ -18,6 +18,15 @@
   small part of the state (observed for Idaho and Oregon in the Pinyon Jay
   pilot run). Hot-spot area is now masked to GAP.RANGE within the state
   before summation.
+* Fixed `create_hot_spot_map()` counting each cell's full area when summing
+  hot-spot area, so cells straddling the GAP.RANGE boundary contributed
+  area lying outside the range. Cells are now weighted by the fraction of
+  their area inside the polygon. The former behavior overshot in proportion
+  to boundary length against cell size, which is negligible for a large
+  range portion but substantial where a state holds only a handful of cells'
+  worth of range; it was enough to report Oregon above 100% of its range
+  area for Pinyon Jay. Reported hot-spot areas shift slightly for all
+  states, and appreciably for small-range ones.
 
 # rENM.analysis 0.1.0
 
