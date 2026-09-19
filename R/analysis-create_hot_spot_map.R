@@ -13,7 +13,9 @@
 #'
 #' Per-state statistics:
 #' \itemize{
-#'   \item Hot-spot area (km\eqn{^2}) within each intersecting state.
+#'   \item Hot-spot area (km\eqn{^2}) within the GAP range portion of each
+#'     intersecting state (hot spots outside GAP range are excluded, since
+#'     a hot spot is a subset of range by definition).
 #'   \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
 #'     where the denominator is the state area clipped to the raster
 #'     footprint (to avoid inflating percentages for partially covered states).
@@ -306,9 +308,22 @@ create_hot_spot_map <- function(alpha_code) {
     state_area_km2 <- terra::expanse(st_clip_sv, unit = "km")
     if (length(state_area_km2) == 0 || is.na(state_area_km2)) state_area_km2 <- 0
 
-    st_sv <- terra::vect(st_sf_i)
-    hs_masked   <- terra::mask(hs,        st_sv)
-    area_masked <- terra::mask(cell_km2,  st_sv)
+    # A hot spot is a subset of range by definition, so it must be masked to
+    # the GAP range polygon within this state, not the full state -- masking
+    # to the state alone let hot-spot area exceed range area for states where
+    # the state's GAP-range overlap is small relative to the state itself.
+    st_gap_i <- suppressWarnings(sf::st_intersection(st_sf_i, gap_conus_tr))
+    if (nrow(st_gap_i) == 0) {
+      out_rows[[i]] <- data.frame(
+        state = st_name, abbr = st_abbr,
+        state_area_km2 = state_area_km2, hotspot_area_km2 = 0,
+        hotspot_pct_of_state = 0, stringsAsFactors = FALSE
+      )
+      next
+    }
+    st_gap_sv   <- terra::vect(st_gap_i)
+    hs_masked   <- terra::mask(hs,        st_gap_sv)
+    area_masked <- terra::mask(cell_km2,  st_gap_sv)
     h_area <- terra::global(area_masked * (hs_masked == 1), "sum", na.rm = TRUE)[1, 1]
     if (is.na(h_area)) h_area <- 0
 
