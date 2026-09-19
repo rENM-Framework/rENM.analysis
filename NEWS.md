@@ -12,6 +12,12 @@
   the trend raster's actual modeling extent (same root cause as the
   `create_state_trend_analysis()` fix above). State selection now also
   requires intersecting `_occs/extent.txt`.
+* Fixed `create_hot_spot_map()` summing hot-spot area over an entire state
+  instead of the state's GAP.RANGE portion, which could make reported
+  hot-spot area exceed range area for states where GAP.RANGE covers only a
+  small part of the state (observed for Idaho and Oregon in the Pinyon Jay
+  pilot run). Hot-spot area is now masked to GAP.RANGE within the state
+  before summation.
 
 # rENM.analysis 0.1.0
 
