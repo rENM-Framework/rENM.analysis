@@ -19,9 +19,13 @@
 #'     range boundary contribute only the fraction of their area that falls
 #'     inside it, so the total does not overshoot the range area where a
 #'     state holds only a few cells' worth of range.
-#'   \item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
-#'     where the denominator is the state area clipped to the raster
-#'     footprint (to avoid inflating percentages for partially covered states).
+#'   \item Range area (km\eqn{^2}) within the state, measured the same
+#'     coverage-weighted way as hot-spot area so the two share a measurement
+#'     basis.
+#'   \item Percent coverage: \code{100 * hotspot_km2 / range_area_km2}.
+#'     Because both are coverage-weighted sums over the same cells, the
+#'     numerator cannot exceed the denominator and the percentage cannot
+#'     pass 100.
 #' }
 #'
 #' Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
@@ -302,8 +306,8 @@ create_hot_spot_map <- function(alpha_code) {
     if (nrow(st_clip) == 0) {
       out_rows[[i]] <- data.frame(
         state = st_name, abbr = st_abbr,
-        state_area_km2 = 0, hotspot_area_km2 = 0,
-        hotspot_pct_of_state = NA_real_, stringsAsFactors = FALSE
+        state_area_km2 = 0, range_area_km2 = 0, hotspot_area_km2 = 0,
+        hotspot_pct_of_range = NA_real_, stringsAsFactors = FALSE
       )
       next
     }
@@ -319,8 +323,9 @@ create_hot_spot_map <- function(alpha_code) {
     if (nrow(st_gap_i) == 0) {
       out_rows[[i]] <- data.frame(
         state = st_name, abbr = st_abbr,
-        state_area_km2 = state_area_km2, hotspot_area_km2 = 0,
-        hotspot_pct_of_state = 0, stringsAsFactors = FALSE
+        state_area_km2 = state_area_km2, range_area_km2 = 0,
+        hotspot_area_km2 = 0, hotspot_pct_of_range = NA_real_,
+        stringsAsFactors = FALSE
       )
       next
     }
@@ -334,16 +339,26 @@ create_hot_spot_map <- function(alpha_code) {
     # cells, and that overshoot was large enough to push reported hot-spot
     # area above range area (Oregon, Pinyon Jay).
     cov <- terra::rasterize(st_gap_sv, hs, cover = TRUE)
+
+    # Range area is measured the same way as hot-spot area: a coverage-weighted
+    # sum over the same cells. Using a vector polygon area as the denominator
+    # instead would put numerator and denominator on different measurement
+    # bases, and a state whose range is almost entirely hot spot could then
+    # report above 100% of its own range.
+    range_area_km2 <- terra::global(cell_km2 * cov, "sum", na.rm = TRUE)[1, 1]
+    if (is.na(range_area_km2)) range_area_km2 <- 0
+
     h_area <- terra::global(cell_km2 * cov * (hs == 1), "sum", na.rm = TRUE)[1, 1]
     if (is.na(h_area)) h_area <- 0
 
-    pct <- if (state_area_km2 > 0) 100 * (h_area / state_area_km2) else NA_real_
+    pct <- if (range_area_km2 > 0) 100 * (h_area / range_area_km2) else NA_real_
 
     out_rows[[i]] <- data.frame(
       state = st_name, abbr = st_abbr,
       state_area_km2 = state_area_km2,
+      range_area_km2 = range_area_km2,
       hotspot_area_km2 = h_area,
-      hotspot_pct_of_state = pct,
+      hotspot_pct_of_range = pct,
       stringsAsFactors = FALSE
     )
   }

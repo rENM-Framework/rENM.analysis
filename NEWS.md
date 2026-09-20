@@ -18,6 +18,16 @@
   small part of the state (observed for Idaho and Oregon in the Pinyon Jay
   pilot run). Hot-spot area is now masked to GAP.RANGE within the state
   before summation.
+* `create_hot_spot_map()` now reports `range_area_km2` per state, measured as
+  a coverage-weighted cell sum over the GAP range within that state — the
+  same basis as `hotspot_area_km2`. The percentage column is computed against
+  it and renamed from `hotspot_pct_of_state` to `hotspot_pct_of_range`.
+  Because numerator and denominator are now sums over the same cells with the
+  same weights, hot-spot area cannot exceed range area and the percentage
+  cannot pass 100; previously the two were measured on different bases (a
+  raster sum against a vector polygon area in EPSG:5070), which left a
+  saturated state able to report above its own range. The vector area
+  remains available as `GAP.RANGE.AREA` from `create_state_trend_analysis()`.
 * Fixed `create_hot_spot_map()` counting each cell's full area when summing
   hot-spot area, so cells straddling the GAP.RANGE boundary contributed
   area lying outside the range. Cells are now weighted by the fraction of
