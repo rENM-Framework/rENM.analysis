@@ -34,9 +34,13 @@ a hot spot is a subset of range by definition). Cells straddling the
 range boundary contribute only the fraction of their area that falls
 inside it, so the total does not overshoot the range area where a
 state holds only a few cells' worth of range.
-\item Percent coverage: \code{100 * hotspot_km2 / state_area_km2},
-where the denominator is the state area clipped to the raster
-footprint (to avoid inflating percentages for partially covered states).
+\item Range area (km\eqn{^2}) within the state, measured the same
+coverage-weighted way as hot-spot area so the two share a measurement
+basis.
+\item Percent coverage: \code{100 * hotspot_km2 / range_area_km2}.
+Because both are coverage-weighted sums over the same cells, the
+numerator cannot exceed the denominator and the percentage cannot
+pass 100.
 }
 
 Non-CONUS areas (AK, HI, PR, GU, VI, AS, MP, UM) are excluded before
