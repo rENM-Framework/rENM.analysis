@@ -18,6 +18,24 @@
   small part of the state (observed for Idaho and Oregon in the Pinyon Jay
   pilot run). Hot-spot area is now masked to GAP.RANGE within the state
   before summation.
+* Added `find_boundary_trend_statistics()`, which compares trend behavior
+  inside the GAP range against the buffer ring surrounding it — the zone
+  between the raw range polygon and the buffered polygon written by
+  `find_range_extent()`. A static range polygon cannot reveal a range edge
+  that is moving; strong positive trends concentrated just outside the
+  historic boundary are the signature of an advancing leading edge, and a
+  range-based statistic never looks there. Reports area, positive and
+  negative percentages, and hot spot area and percentage for each zone,
+  writing `<CODE>-Suitability-Trend-Boundary-Statistics.csv`.
+
+  Reported range-wide rather than per state, for two reasons: the ring
+  extends beyond the range into states holding none of it, which have no
+  counterpart row in the range-based table; and a statistic over few raster
+  cells is unstable between model realizations, while the range-wide ring
+  and interior figures reproduce closely. Areas use the same coverage
+  weighting as `create_hot_spot_map()`, and percentages are taken over the
+  area carrying trend data, which can be smaller than the zone where the
+  model produced no prediction.
 * `create_hot_spot_map()` now reports `range_area_km2` per state, measured as
   a coverage-weighted cell sum over the GAP range within that state — the
   same basis as `hotspot_area_km2`. The percentage column is computed against
