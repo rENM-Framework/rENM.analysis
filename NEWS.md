@@ -1,4 +1,16 @@
 # rENM.analysis 0.2.0.9000
+* `find_trend_percentages()` — `percent_positive`, `percent_negative` and
+  `percent_zero` are now fractions of area rather than of cell count. The
+  area columns were added earlier in this cycle without rebasing the
+  percentages, so each report printed an area beside a percentage that was
+  not that area over the stated denominator. Cells range from about 62 to
+  72 km² across these extents, which moved the two bases apart by up to 1.4
+  points: Cassin's Sparrow read 66.86% on counts against 65.43% on area.
+  Area is the basis everywhere else the framework reports a percentage, so a
+  single report was mixing both conventions, `find_boundary_trend_statistics()`
+  being already area-based. The cell counts are unchanged and remain in the
+  file as counts. Percentages in existing CSVs shift slightly; reports built
+  from them should be regenerated.
 * `find_suitability_change_trend()` — a failed ASCII Grid write no longer
   aborts the run. The `.asc` is a convenience copy; every consumer reads the
   GeoTIFF and falls back to `.asc` only when the `.tif` is absent, so losing

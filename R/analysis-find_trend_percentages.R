@@ -29,9 +29,13 @@
 #'         falling back to ASCII grid:
 #'         \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 #'         \code{<alpha_code>-Suitability-Trend.(tif|asc)}
-#'   \item Computes counts and percentages of positive (>0), negative (<0),
-#'         and zero (=0) cells over the full raster extent.
-#'   \item Excludes NA cells from percentage denominators.
+#'   \item Computes counts of positive (>0), negative (<0), and zero (=0)
+#'         cells, and the area each class covers.
+#'   \item Percentages are fractions of AREA, not of cell count. Cells are
+#'         not equal in area on a lon/lat grid, so the two bases differ.
+#'         Area is the basis used everywhere else the framework reports a
+#'         percentage.
+#'   \item Excludes NA cells from both denominators.
 #'   \item Computes extent area (km^2) using \code{terra::cellSize}
 #'         (in m^2), converted to km^2.
 #' }
@@ -62,10 +66,12 @@
 #'   \item \code{positive_cells}: Count of cells > 0.
 #'   \item \code{negative_cells}: Count of cells < 0.
 #'   \item \code{zero_cells}: Count of cells == 0.
-#'   \item \code{percent_positive}: Percentage of positive cells.
-#'   \item \code{percent_negative}: Percentage of negative cells.
-#'   \item \code{percent_zero}: Percentage of zero cells.
-#'   \item \code{percent_sum}: Sum of percentages.
+#'   \item \code{percent_positive}: \code{positive_area_km2} as a
+#'     percentage of \code{valid_area_km2}. An area fraction, not a cell
+#'     fraction, so it will not equal
+#'     \code{positive_cells / valid_cells}.
+#'   \item \code{percent_negative}, \code{percent_zero}: likewise.
+#'   \item \code{percent_sum}: Sum of the three; 100 by construction.
 #'   \item \code{extent_area_km2}: Area of the full rectangular extent,
 #'     including cells with no data.
 #'   \item \code{valid_area_km2}: Area of the non-NA cells. This is the
@@ -175,12 +181,6 @@ find_trend_percentages <- function(
   negative_cells <- as.numeric(terra::global(r < 0, fun = "sum", na.rm = TRUE)[1, 1])
   zero_cells     <- as.numeric(terra::global(r == 0, fun = "sum", na.rm = TRUE)[1, 1])
 
-  pct <- function(x, denom) 100 * x / denom
-  percent_positive <- pct(positive_cells, valid_cells)
-  percent_negative <- pct(negative_cells, valid_cells)
-  percent_zero     <- pct(zero_cells,     valid_cells)
-  percent_sum      <- percent_positive + percent_negative + percent_zero
-
   # ---------------------------- Class areas (km^2) ----------------------------
   # The counts above answer "how many cells"; a report asks "how much area".
   # Cells are not equal in area on a lon/lat grid, so an area cannot be
@@ -195,6 +195,25 @@ find_trend_percentages <- function(
   positive_area_km2 <- gsum(cs_km2 * (r > 0))
   negative_area_km2 <- gsum(cs_km2 * (r < 0))
   zero_area_km2     <- gsum(cs_km2 * (r == 0))
+
+  if (valid_area_km2 <= 0) {
+    stop("Valid area is zero; cannot compute percentages.", call. = FALSE)
+  }
+
+  # ------------------------- Percentages (area basis) -------------------------
+  # These are fractions of AREA, not of cell count. Cells are not equal in
+  # area on a lon/lat grid, so the two differ: across these extents cell area
+  # ranges from about 62 to 72 km2, which moved the two bases apart by up to
+  # 1.4 points. Everything else the pipeline reports as a percentage is a
+  # coverage-weighted area fraction -- hot spots, state ranges, and the zones
+  # in find_boundary_trend_statistics() -- and a report that printed an area
+  # beside a count-derived percentage invited a reader to divide one by the
+  # other and get a third number. The cell counts above are kept as counts.
+  pct <- function(x) 100 * x / valid_area_km2
+  percent_positive <- pct(positive_area_km2)
+  percent_negative <- pct(negative_area_km2)
+  percent_zero     <- pct(zero_area_km2)
+  percent_sum      <- percent_positive + percent_negative + percent_zero
 
   # ---------------------------- Extent area (km^2) ----------------------------
   bump("Computing extent area (km^2) via cell areas")

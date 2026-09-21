@@ -27,10 +27,12 @@ Tibble. A single-row table with the following fields:
 \item \code{positive_cells}: Count of cells > 0.
 \item \code{negative_cells}: Count of cells < 0.
 \item \code{zero_cells}: Count of cells == 0.
-\item \code{percent_positive}: Percentage of positive cells.
-\item \code{percent_negative}: Percentage of negative cells.
-\item \code{percent_zero}: Percentage of zero cells.
-\item \code{percent_sum}: Sum of percentages.
+\item \code{percent_positive}: \code{positive_area_km2} as a
+percentage of \code{valid_area_km2}. An area fraction, not a cell
+fraction, so it will not equal
+\code{positive_cells / valid_cells}.
+\item \code{percent_negative}, \code{percent_zero}: likewise.
+\item \code{percent_sum}: Sum of the three; 100 by construction.
 \item \code{extent_area_km2}: Area of the full rectangular extent,
 including cells with no data.
 \item \code{valid_area_km2}: Area of the non-NA cells. This is the
@@ -78,9 +80,13 @@ change trend each get their own file.
 falling back to ASCII grid:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 \code{<alpha_code>-Suitability-Trend.(tif|asc)}
-\item Computes counts and percentages of positive (>0), negative (<0),
-and zero (=0) cells over the full raster extent.
-\item Excludes NA cells from percentage denominators.
+\item Computes counts of positive (>0), negative (<0), and zero (=0)
+cells, and the area each class covers.
+\item Percentages are fractions of AREA, not of cell count. Cells are
+not equal in area on a lon/lat grid, so the two bases differ.
+Area is the basis used everywhere else the framework reports a
+percentage.
+\item Excludes NA cells from both denominators.
 \item Computes extent area (km^2) using \code{terra::cellSize}
 (in m^2), converted to km^2.
 }
