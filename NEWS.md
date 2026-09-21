@@ -1,5 +1,48 @@
 # rENM.analysis 0.2.0.9000
-
+* `find_trend_percentages()` — gained a `layer` argument, defaulting to
+  `"Suitability-Trend"` and also accepting `"Suitability-Change-Trend"`.
+  The function was hardcoded to the suitability trend raster, so the
+  accelerating and decelerating figures the narrative reports had no
+  computed source anywhere in the pipeline. The argument names both the
+  input raster and the output CSV, so the two runs do not collide.
+* `find_trend_percentages()` — added `valid_area_km2`,
+  `positive_area_km2`, `negative_area_km2` and `zero_area_km2`. The
+  function reported cell counts and one total extent area, but the report
+  asks for the area of each trend class, and on a lon/lat grid that cannot
+  be recovered from a count and a mean cell size. `valid_area_km2` is also
+  the denominator the existing percentages are taken against, which was
+  not previously stated anywhere: `extent_area_km2` covers the full
+  rectangle including cells with no data, and describing a percentage as a
+  share of the modeled extent was therefore wrong.
+* `create_hot_spot_map()` and `create_state_trend_analysis()` — the GAP range
+  shapefile is now resolved through the `GAP.RANGE` column of
+  `data/_species.csv` rather than built from the alpha code as
+  `b<CODE>x_CONUS_Range_2001v1`. That pattern is a convention and not a
+  rule, and both functions stopped with "GAP range shapefile not found" for
+  any species whose range file departs from it. Mexican Spotted Owl, alpha
+  code `MSOW`, ships as `bSPOWl_CONUS_Range_2001v1`. The more serious
+  problem was that the three functions reading this file did not agree on
+  how to find it: `find_boundary_trend_statistics()` already used the
+  species table, so a single run could resolve the same input two different
+  ways. All three now call one internal helper, `.gap_range_path()`.
+* Fixed `create_hot_spot_map()` aborting with `replacement has 2 rows, data
+  has 1` for species whose range boundary coincides with a state boundary.
+  Cassin's Sparrow failed at the western tip of Texas. The range is clipped
+  to the union of the states before use, so its edges already run along
+  state lines; intersecting it again with an individual state lays two
+  edges on top of each other, and GEOS reports that contact as points and
+  slivers alongside the shared area. sf cannot fit the resulting geometry
+  collection onto a one-row data frame. Intersections in this function now
+  work on geometry rather than on `sf` objects, and keep only the polygonal
+  part of any result, which is the only part that carries area. Whether a
+  species trips this depends on where its range edge falls, so it was
+  absent from the three species the clipping fix was developed against.
+  Dissolving those parts is done with `terra::aggregate()` rather than
+  `sf::st_union()`, because a sliver can carry a duplicate vertex and s2
+  rejects that as a degenerate edge on the sphere. terra is planar and
+  rasterizes in the raster's CRS in any case. Per-state areas are also
+  summed across parts now, rather than taking the first, which was wrong
+  for any multi-part clip.
 * Fixed `create_state_trend_analysis()` erroring with `[crop] extents do not
   overlap` for species whose trend raster's real data footprint (the
   modeling extent used to crop predictor variables) is smaller than the
@@ -57,7 +100,6 @@
   states, and appreciably for small-range ones.
 
 # rENM.analysis 0.1.0
-
 * Initial release.
 * Added `find_suitability_trend()` to compute per-cell Theil-Sen trends and
   Mann-Kendall statistics across the rENM time series.

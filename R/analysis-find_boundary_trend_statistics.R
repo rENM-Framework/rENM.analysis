@@ -98,25 +98,7 @@ find_boundary_trend_statistics <- function(alpha_code) {
 
   # ---- Resolve the raw GAP shapefile --------------------------------------
   bump("Resolving GAP range shapefile")
-  species_csv <- file.path(project_dir, "data", "_species.csv")
-  if (!file.exists(species_csv)) {
-    stop("Species table not found at: ", species_csv, call. = FALSE)
-  }
-  sp       <- utils::read.csv(species_csv, stringsAsFactors = FALSE, check.names = FALSE)
-  norm     <- function(x) gsub("[^A-Z0-9]", "", toupper(x))
-  col_norm <- norm(names(sp))
-  a_idx    <- match("ALPHACODE", col_norm, nomatch = 0L)
-  g_idx    <- match("GAPRANGE",  col_norm, nomatch = 0L)
-  if (a_idx == 0L || g_idx == 0L) {
-    stop("Species table must contain ALPHA.CODE and GAP.RANGE columns.", call. = FALSE)
-  }
-  row_idx <- which(toupper(trimws(sp[[names(sp)[a_idx]]])) == code)
-  if (!length(row_idx)) {
-    stop("No row found with alpha code '", code, "' in: ", species_csv, call. = FALSE)
-  }
-  gap_range <- trimws(sp[[names(sp)[g_idx]]][row_idx[1L]])
-  gap_path  <- file.path(project_dir, "data", "shapefiles",
-                         gap_range, paste0(gap_range, ".shp"))
+  gap_path <- .gap_range_path(project_dir, code)
 
   for (f in c(gap_path, buffer_path, trend_path, hs_path)) {
     if (!file.exists(f)) stop("Required input not found: ", f, call. = FALSE)

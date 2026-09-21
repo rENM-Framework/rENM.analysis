@@ -10,10 +10,9 @@
 #'   \item U.S. state boundaries:
 #'   \code{<project_dir>/data/shapefiles/tl_2012_us_state/}
 #'   \code{tl_2012_us_state.shp}
-#'   \item GAP range shapefile:
-#'   \code{<project_dir>/data/shapefiles/}
-#'   \code{b<alpha_code>x_CONUS_Range_2001v1/}
-#'   \code{b<alpha_code>x_CONUS_Range_2001v1.shp}
+#'   \item GAP range shapefile, named by the \code{GAP.RANGE} column of
+#'   \code{<project_dir>/data/_species.csv}:
+#'   \code{<project_dir>/data/shapefiles/<GAP.RANGE>/<GAP.RANGE>.shp}
 #'   \item Suitability trend raster:
 #'   \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 #'   \code{<alpha_code>-Suitability-Trend.tif}
@@ -143,11 +142,7 @@ create_state_trend_analysis <- function(alpha_code) {
     project_dir, "data", "shapefiles", "tl_2012_us_state", "tl_2012_us_state.shp"
   )
 
-  gap_path <- file.path(
-    project_dir, "data", "shapefiles",
-    sprintf("b%sx_CONUS_Range_2001v1", alpha_code),
-    sprintf("b%sx_CONUS_Range_2001v1.shp", alpha_code)
-  )
+  gap_path <- .gap_range_path(project_dir, alpha_code)
 
   trend_path <- file.path(
     project_dir, "runs", alpha_code, "Trends", "suitability",

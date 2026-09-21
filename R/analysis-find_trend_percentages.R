@@ -15,7 +15,9 @@
 #' \itemize{
 #'   \item CSV summary file written to:
 #'         \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-#'         \code{<alpha_code>-Suitability-Trend-Percentages.csv}
+#'         \code{<alpha_code>-<layer>-Percentages.csv}, where \code{<layer>}
+#'         is the \code{layer} argument, so the suitability trend and the
+#'         change trend each get their own file.
 #'   \item Processing summary appended to:
 #'         \code{<project_dir>/runs/<alpha_code>/}
 #'         \code{_log.txt}
@@ -45,11 +47,16 @@
 #' \code{rENM_project_dir()}, ensuring CRAN-compliant path handling.
 #'
 #' @param alpha_code Character. Species ALPHA.CODE (for example, "CASP").
+#' @param layer Character. Which trend raster to summarize:
+#'   \code{"Suitability-Trend"} (the default) or
+#'   \code{"Suitability-Change-Trend"}. The value names both the input
+#'   raster and the output CSV, so the two runs do not overwrite each other.
 #'
 #' @return
 #' Tibble. A single-row table with the following fields:
 #' \itemize{
 #'   \item \code{alpha_code}: Species identifier.
+#'   \item \code{layer}: Which trend raster was summarized.
 #'   \item \code{total_cells}: Total raster cell count.
 #'   \item \code{valid_cells}: Non-NA cell count.
 #'   \item \code{positive_cells}: Count of cells > 0.
@@ -59,7 +66,13 @@
 #'   \item \code{percent_negative}: Percentage of negative cells.
 #'   \item \code{percent_zero}: Percentage of zero cells.
 #'   \item \code{percent_sum}: Sum of percentages.
-#'   \item \code{extent_area_km2}: Total raster extent area in km^2.
+#'   \item \code{extent_area_km2}: Area of the full rectangular extent,
+#'     including cells with no data.
+#'   \item \code{valid_area_km2}: Area of the non-NA cells. This is the
+#'     denominator the percentages above are taken against; it is smaller
+#'     than \code{extent_area_km2} whenever the raster has NA cells.
+#'   \item \code{positive_area_km2}, \code{negative_area_km2},
+#'     \code{zero_area_km2}: Area of each trend class.
 #'   \item \code{raster_path}: Source raster file path.
 #'   \item \code{computed_at_utc}: UTC timestamp of computation.
 #' }
@@ -80,7 +93,12 @@
 #' }
 #'
 #' @export
-find_trend_percentages <- function(alpha_code) {
+find_trend_percentages <- function(
+    alpha_code,
+    layer = c("Suitability-Trend", "Suitability-Change-Trend")
+) {
+  layer <- match.arg(layer)
+
   # ---------------------------- Setup & Timing ----------------------------
   t_start <- Sys.time()
   step_i <- 0L
@@ -111,8 +129,8 @@ find_trend_percentages <- function(alpha_code) {
     dir.create(trend_dir, recursive = TRUE, showWarnings = FALSE)
   }
 
-  tif_path <- file.path(trend_dir, sprintf("%s-Suitability-Trend.tif", alpha_code))
-  asc_path <- file.path(trend_dir, sprintf("%s-Suitability-Trend.asc", alpha_code))
+  tif_path <- file.path(trend_dir, sprintf("%s-%s.tif", alpha_code, layer))
+  asc_path <- file.path(trend_dir, sprintf("%s-%s.asc", alpha_code, layer))
 
   raster_path <- if (file.exists(tif_path)) {
     tif_path
@@ -127,7 +145,7 @@ find_trend_percentages <- function(alpha_code) {
 
   out_csv <- file.path(
     trend_dir,
-    sprintf("%s-Suitability-Trend-Percentages.csv", alpha_code)
+    sprintf("%s-%s-Percentages.csv", alpha_code, layer)
   )
   out_log <- file.path(runs_root, "_log.txt")
 
@@ -163,6 +181,21 @@ find_trend_percentages <- function(alpha_code) {
   percent_zero     <- pct(zero_cells,     valid_cells)
   percent_sum      <- percent_positive + percent_negative + percent_zero
 
+  # ---------------------------- Class areas (km^2) ----------------------------
+  # The counts above answer "how many cells"; a report asks "how much area".
+  # Cells are not equal in area on a lon/lat grid, so an area cannot be
+  # recovered from a count and a mean cell size. Compute each class directly.
+  bump("Computing class areas (km^2)")
+  cs_km2 <- terra::cellSize(r, unit = "km")
+  gsum <- function(x) {
+    v <- terra::global(x, fun = "sum", na.rm = TRUE)[1, 1]
+    if (is.na(v)) 0 else as.numeric(v)
+  }
+  valid_area_km2    <- gsum(cs_km2 * !is.na(r))
+  positive_area_km2 <- gsum(cs_km2 * (r > 0))
+  negative_area_km2 <- gsum(cs_km2 * (r < 0))
+  zero_area_km2     <- gsum(cs_km2 * (r == 0))
+
   # ---------------------------- Extent area (km^2) ----------------------------
   bump("Computing extent area (km^2) via cell areas")
   extent_area_km2 <- tryCatch({
@@ -181,6 +214,7 @@ find_trend_percentages <- function(alpha_code) {
   bump("Assembling results and writing CSV")
   res <- tibble::tibble(
     alpha_code         = alpha_code,
+    layer              = layer,
     total_cells        = total_cells,
     valid_cells        = valid_cells,
     positive_cells     = positive_cells,
@@ -191,6 +225,10 @@ find_trend_percentages <- function(alpha_code) {
     percent_zero       = round(percent_zero, 6),
     percent_sum        = round(percent_sum, 6),
     extent_area_km2    = if (is.na(extent_area_km2)) NA_real_ else round(extent_area_km2, 6),
+    valid_area_km2     = round(valid_area_km2,    6),
+    positive_area_km2  = round(positive_area_km2, 6),
+    negative_area_km2  = round(negative_area_km2, 6),
+    zero_area_km2      = round(zero_area_km2,     6),
     raster_path        = raster_path,
     computed_at_utc    = format(Sys.time(), tz = "UTC", usetz = TRUE)
   )
@@ -227,6 +265,7 @@ find_trend_percentages <- function(alpha_code) {
     header,
     sprintf("%-18s %s", "Timestamp:",     format(Sys.time(), tz = "UTC", usetz = TRUE)),
     sprintf("%-18s %s", "Alpha code:",    alpha_code),
+    sprintf("%-18s %s", "Layer:",         layer),
     sprintf("%-18s %s", "Raster source:", src_type),
     sprintf("%-18s %d", "Total cells:",   total_cells),
     sprintf("%-18s %d", "Valid cells:",   valid_cells),
@@ -238,6 +277,9 @@ find_trend_percentages <- function(alpha_code) {
     sprintf("%-18s %s", "Percent zero:",     fmt_pct(percent_zero)),
     sprintf("%-18s %s", "Percent sum:",      fmt_pct(percent_sum)),
     sprintf("%-18s %s", "Extent area (km^2):", fmt_area(extent_area_km2)),
+    sprintf("%-18s %s", "Valid area (km^2):",  fmt_area(valid_area_km2)),
+    sprintf("%-18s %s", "Positive area:",      fmt_area(positive_area_km2)),
+    sprintf("%-18s %s", "Negative area:",      fmt_area(negative_area_km2)),
     sprintf("%-18s %s", "Outputs saved:", "1 CSV"),
     sprintf("%-18s %.3f sec", "Total elapsed:", elapsed),
     sprintf("%-18s %s", "Output file:", out_csv)

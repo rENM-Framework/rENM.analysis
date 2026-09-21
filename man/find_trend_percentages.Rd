@@ -4,15 +4,24 @@
 \alias{find_trend_percentages}
 \title{Find positive and negative trend percentages}
 \usage{
-find_trend_percentages(alpha_code)
+find_trend_percentages(
+  alpha_code,
+  layer = c("Suitability-Trend", "Suitability-Change-Trend")
+)
 }
 \arguments{
 \item{alpha_code}{Character. Species ALPHA.CODE (for example, "CASP").}
+
+\item{layer}{Character. Which trend raster to summarize:
+\code{"Suitability-Trend"} (the default) or
+\code{"Suitability-Change-Trend"}. The value names both the input
+raster and the output CSV, so the two runs do not overwrite each other.}
 }
 \value{
 Tibble. A single-row table with the following fields:
 \itemize{
 \item \code{alpha_code}: Species identifier.
+\item \code{layer}: Which trend raster was summarized.
 \item \code{total_cells}: Total raster cell count.
 \item \code{valid_cells}: Non-NA cell count.
 \item \code{positive_cells}: Count of cells > 0.
@@ -22,7 +31,13 @@ Tibble. A single-row table with the following fields:
 \item \code{percent_negative}: Percentage of negative cells.
 \item \code{percent_zero}: Percentage of zero cells.
 \item \code{percent_sum}: Sum of percentages.
-\item \code{extent_area_km2}: Total raster extent area in km^2.
+\item \code{extent_area_km2}: Area of the full rectangular extent,
+including cells with no data.
+\item \code{valid_area_km2}: Area of the non-NA cells. This is the
+denominator the percentages above are taken against; it is smaller
+than \code{extent_area_km2} whenever the raster has NA cells.
+\item \code{positive_area_km2}, \code{negative_area_km2},
+\code{zero_area_km2}: Area of each trend class.
 \item \code{raster_path}: Source raster file path.
 \item \code{computed_at_utc}: UTC timestamp of computation.
 }
@@ -49,7 +64,9 @@ the full modeled extent.
 \itemize{
 \item CSV summary file written to:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-\code{<alpha_code>-Suitability-Trend-Percentages.csv}
+\code{<alpha_code>-<layer>-Percentages.csv}, where \code{<layer>}
+is the \code{layer} argument, so the suitability trend and the
+change trend each get their own file.
 \item Processing summary appended to:
 \code{<project_dir>/runs/<alpha_code>/}
 \code{_log.txt}

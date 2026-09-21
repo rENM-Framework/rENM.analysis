@@ -55,8 +55,12 @@
 #' @importFrom ggplot2 coord_sf labs theme_minimal theme element_rect element_text ggsave
 #' @importFrom sf st_read st_make_valid st_crs st_transform st_union st_intersection
 #' @importFrom sf st_intersects st_geometry st_point_on_surface st_bbox st_as_sfc st_sf
+#' @importFrom sf st_collection_extract st_geometry_type st_is_empty
 #' @importFrom terra rast same.crs project compareGeom resample vect mask crop ext crs
 #' @importFrom terra cellSize expanse global rasterize
+# terra::aggregate() is called with its namespace prefix rather than
+# imported: importing it collides with stats::aggregate, which another
+# function in this package already imports.
 #' @importFrom dplyr filter bind_rows arrange desc
 #' @importFrom readr write_csv
 #'
@@ -88,11 +92,7 @@ create_hot_spot_map <- function(alpha_code) {
     project_dir, "data", "shapefiles",
     "tl_2012_us_state", "tl_2012_us_state.shp"
   )
-  gap_path <- file.path(
-    project_dir, "data", "shapefiles",
-    sprintf("b%sx_CONUS_Range_2001v1", code),
-    sprintf("b%sx_CONUS_Range_2001v1.shp", code)
-  )
+  gap_path <- .gap_range_path(project_dir, code)
   trend_tif  <- file.path(base_dir, sprintf("%s-Suitability-Trend.tif", code))
   trend_asc  <- file.path(base_dir, sprintf("%s-Suitability-Trend.asc", code))
   change_tif <- file.path(base_dir, sprintf("%s-Suitability-Change-Trend.tif", code))
@@ -188,12 +188,41 @@ create_hot_spot_map <- function(alpha_code) {
   )
   model_bbox <- sf::st_transform(model_bbox_wgs84, sf::st_crs(states))
 
+  # Intersecting two polygon layers whose boundaries coincide does not return
+  # a polygon. Where edges touch without overlapping, GEOS reports the contact
+  # itself, so the result is a geometry collection holding degenerate points
+  # and zero-width slivers alongside the shared area. Only the polygonal part
+  # carries area, and an sfc of length one can always be placed on a one-row
+  # sf object, which a collection cannot.
+  # The parts are left separate here and dissolved with terra at the point of
+  # use. Dissolving in sf would mean re-entering s2, and these geometries are
+  # exactly the ones s2 refuses: a sliver can carry a duplicate vertex, which
+  # is a degenerate edge on the sphere. terra is planar and rasterizes in the
+  # raster's own CRS regardless, so nothing is lost by dissolving there.
+  .polygons_only <- function(g) {
+    if (length(g) == 0L) return(g)
+    if (any(sf::st_geometry_type(g) == "GEOMETRYCOLLECTION")) {
+      g <- suppressWarnings(sf::st_collection_extract(g, "POLYGON"))
+    }
+    g <- g[sf::st_geometry_type(g) %in% c("POLYGON", "MULTIPOLYGON")]
+    g[!sf::st_is_empty(g)]
+  }
+
+  # Dissolve, so a cell straddling two parts is counted once by the
+  # coverage-weighted sums below rather than once per part.
+  .as_one_vect <- function(g) {
+    terra::aggregate(terra::vect(sf::st_sf(geometry = g)))
+  }
+
   # ---- Crop, plot, save ----
   non_conus <- c("AK", "HI", "PR", "GU", "VI", "AS", "MP", "UM")
   states_conus <- dplyr::filter(states, !.data$STUSPS %in% non_conus)
-  gap_conus <- suppressWarnings(
+  gap_conus <- .polygons_only(suppressWarnings(
     sf::st_intersection(sf::st_union(gap), sf::st_union(states_conus))
-  )
+  ))
+  if (length(gap_conus) == 0L) {
+    stop("GAP range does not intersect CONUS for ", code, call. = FALSE)
+  }
   idx_gap   <- sf::st_intersects(states_conus, gap_conus,  sparse = TRUE)
   idx_model <- sf::st_intersects(states_conus, model_bbox, sparse = TRUE)
   states_in_gap <- states_conus[lengths(idx_gap) > 0 & lengths(idx_model) > 0, , drop = FALSE]
@@ -302,8 +331,14 @@ create_hot_spot_map <- function(alpha_code) {
     st_name <- get_vals(states_in_gap_tr, i, nm_col, as.character(i))
     st_abbr <- get_vals(states_in_gap_tr, i, ab_col, NA_character_)
 
-    st_clip <- suppressWarnings(sf::st_intersection(st_sf_i, rst_ext_poly_sf))
-    if (nrow(st_clip) == 0) {
+    # Intersections below stay in sfc: none of the attributes of the clipped
+    # result are used, and an sf-on-sf intersection must fit its result back
+    # onto a one-row data frame, which fails outright when the result is a
+    # geometry collection.
+    st_clip <- .polygons_only(suppressWarnings(
+      sf::st_intersection(sf::st_geometry(st_sf_i), rst_ext_poly_sf)
+    ))
+    if (length(st_clip) == 0L) {
       out_rows[[i]] <- data.frame(
         state = st_name, abbr = st_abbr,
         state_area_km2 = 0, range_area_km2 = 0, hotspot_area_km2 = 0,
@@ -311,16 +346,25 @@ create_hot_spot_map <- function(alpha_code) {
       )
       next
     }
-    st_clip_sv <- terra::vect(st_clip)
-    state_area_km2 <- terra::expanse(st_clip_sv, unit = "km")
+    st_clip_sv <- .as_one_vect(st_clip)
+    state_area_km2 <- sum(terra::expanse(st_clip_sv, unit = "km"))
     if (length(state_area_km2) == 0 || is.na(state_area_km2)) state_area_km2 <- 0
 
     # A hot spot is a subset of range by definition, so it must be masked to
     # the GAP range polygon within this state, not the full state -- masking
     # to the state alone let hot-spot area exceed range area for states where
     # the state's GAP-range overlap is small relative to the state itself.
-    st_gap_i <- suppressWarnings(sf::st_intersection(st_sf_i, gap_conus_tr))
-    if (nrow(st_gap_i) == 0) {
+    #
+    # gap_conus_tr was itself clipped to the union of the states, so its
+    # boundary runs along state boundaries. Intersecting it with a single
+    # state therefore lays two edges on top of each other, and the contact is
+    # returned as points and slivers beside the shared area. .polygons_only()
+    # discards those. Texas, Cassin's Sparrow, was the first range edge to
+    # land on a state line exactly enough to produce one.
+    st_gap_i <- .polygons_only(suppressWarnings(
+      sf::st_intersection(sf::st_geometry(st_sf_i), gap_conus_tr)
+    ))
+    if (length(st_gap_i) == 0L) {
       out_rows[[i]] <- data.frame(
         state = st_name, abbr = st_abbr,
         state_area_km2 = state_area_km2, range_area_km2 = 0,
@@ -329,7 +373,7 @@ create_hot_spot_map <- function(alpha_code) {
       )
       next
     }
-    st_gap_sv <- terra::vect(st_gap_i)
+    st_gap_sv <- .as_one_vect(st_gap_i)
 
     # Each cell contributes only the fraction of its area that actually falls
     # inside the GAP polygon. terra::mask() keeps a cell whenever its center
