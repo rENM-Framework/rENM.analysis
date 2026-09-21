@@ -30,14 +30,14 @@
 #' \code{<rENM_project_dir()>/runs/<alpha_code>/}
 #' \code{Trends/suitability/}
 #'
-#' as both AAIGrid (.asc) and GeoTIFF (.tif) with filenames:
+#' as GeoTIFF (.tif) with filenames:
 #'
 #' \itemize{
-#'   \item <alpha_code>-Suitability-Trend.\{asc,tif\}
+#'   \item <alpha_code>-Suitability-Trend.tif
 #'         (Theil-Sen slope per year)
-#'   \item <alpha_code>-Suitability-Trend-p.\{asc,tif\}
+#'   \item <alpha_code>-Suitability-Trend-p.tif
 #'         (Mann-Kendall p-value)
-#'   \item <alpha_code>-Suitability-Trend-z.\{asc,tif\}
+#'   \item <alpha_code>-Suitability-Trend-z.tif
 #'         (Mann-Kendall Z statistic)
 #' }
 #'
@@ -73,7 +73,6 @@
 #' \itemize{
 #'   \item paths:
 #'     \itemize{
-#'       \item asc: List of file paths to AAIGrid outputs
 #'       \item tif: List of file paths to GeoTIFF outputs
 #'       \item png: Character path to PNG output (if generated)
 #'       \item log: Character path to log file
@@ -204,12 +203,9 @@ find_suitability_trend <- function(alpha_code) {
   p_r     <- stats_r[["p"]]
 
   ## ------------------------------- Write outputs -------------------------- ##
-  asc_out <- list(
-    trend = file.path(trend_dir, sprintf("%s-Suitability-Trend.asc", code)),
-    p     = file.path(trend_dir, sprintf("%s-Suitability-Trend-p.asc", code)),
-    z     = file.path(trend_dir, sprintf("%s-Suitability-Trend-z.asc", code))
-  )
-
+  # Only GeoTIFFs are written. An asc_out list used to be built here and
+  # logged as "Outputs (AAIGrid)" without ever being written, so every run
+  # log named three files that did not exist.
   tif_out <- list(
     trend = file.path(trend_dir, sprintf("%s-Suitability-Trend.tif", code)),
     p     = file.path(trend_dir, sprintf("%s-Suitability-Trend-p.tif", code)),
@@ -265,10 +261,6 @@ find_suitability_trend <- function(alpha_code) {
     sprintf("  Trend: %s", tif_out$trend),
     sprintf("  p:     %s", tif_out$p),
     sprintf("  z:     %s", tif_out$z),
-    "Outputs (AAIGrid):",
-    sprintf("  Trend: %s", asc_out$trend),
-    sprintf("  p:     %s", asc_out$p),
-    sprintf("  z:     %s", asc_out$z),
     sprintf("PNG output: %s", ifelse(is.na(png_path), "Not generated", png_path)),
     "Diagnostics:",
     sprintf("  Total cells:        %d", n_cells),
@@ -279,7 +271,7 @@ find_suitability_trend <- function(alpha_code) {
   cat(log_block, file = log_path, sep = "\n", append = TRUE)
 
   invisible(list(
-    paths   = list(asc = asc_out, tif = tif_out, png = png_path, log = log_path),
+    paths   = list(tif = tif_out, png = png_path, log = log_path),
     n_years = n_years
   ))
 }

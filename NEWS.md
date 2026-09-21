@@ -1,4 +1,21 @@
 # rENM.analysis 0.2.0.9000
+* `find_suitability_change_trend()` — a failed ASCII Grid write no longer
+  aborts the run. The `.asc` is a convenience copy; every consumer reads the
+  GeoTIFF and falls back to `.asc` only when the `.tif` is absent, so losing
+  it costs nothing. Greater Roadrunner died here fifteen minutes into its run
+  with a complete, valid GeoTIFF and a complete, valid `.asc` both sitting on
+  disk. Three faults in one block: the retry passed `gdal = "AAIGrid"`, but
+  `gdal` takes creation options as `KEY=VALUE` and the driver belongs in
+  `filetype`, so the retry could never have succeeded; the handler discarded
+  the real condition and reported a missing AAIGrid driver, which was a guess
+  and a wrong one, since the driver is present; and a secondary artifact was
+  allowed to end the run. Now writes with `filetype`, reports the actual
+  error, and warns.
+* `find_suitability_trend()` — removed the `asc_out` list, which was built,
+  never written, and then logged under "Outputs (AAIGrid)". Every run log for
+  every species named three files that had never existed. The returned
+  `paths` list loses its `asc` element for the same reason; nothing in the
+  framework read it.
 * `find_trend_percentages()` — gained a `layer` argument, defaulting to
   `"Suitability-Trend"` and also accepting `"Suitability-Change-Trend"`.
   The function was hardcoded to the suitability trend raster, so the

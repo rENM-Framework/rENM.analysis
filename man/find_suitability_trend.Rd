@@ -15,7 +15,6 @@ Invisibly returns a List with the following structure:
 \itemize{
 \item paths:
 \itemize{
-\item asc: List of file paths to AAIGrid outputs
 \item tif: List of file paths to GeoTIFF outputs
 \item png: Character path to PNG output (if generated)
 \item log: Character path to log file
@@ -62,14 +61,14 @@ Results are written to:
 \code{<rENM_project_dir()>/runs/<alpha_code>/}
 \code{Trends/suitability/}
 
-as both AAIGrid (.asc) and GeoTIFF (.tif) with filenames:
+as GeoTIFF (.tif) with filenames:
 
 \itemize{
-\item <alpha_code>-Suitability-Trend.\{asc,tif\}
+\item <alpha_code>-Suitability-Trend.tif
 (Theil-Sen slope per year)
-\item <alpha_code>-Suitability-Trend-p.\{asc,tif\}
+\item <alpha_code>-Suitability-Trend-p.tif
 (Mann-Kendall p-value)
-\item <alpha_code>-Suitability-Trend-z.\{asc,tif\}
+\item <alpha_code>-Suitability-Trend-z.tif
 (Mann-Kendall Z statistic)
 }
 

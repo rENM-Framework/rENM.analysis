@@ -154,23 +154,31 @@ find_suitability_change_trend <- function(alpha_code) {
 
   terra::writeRaster(ts_diff, tif_path, overwrite = TRUE)
 
+  # The .asc is a convenience copy. Every consumer in the framework reads the
+  # GeoTIFF and falls back to .asc only when the .tif is absent, so failing to
+  # write it costs nothing that matters. This used to abort instead, which
+  # discarded a completed model fit over a duplicate of a file already on
+  # disk: Greater Roadrunner died here fifteen minutes into its run with the
+  # GeoTIFF sitting beside the error.
+  #
+  # The driver belongs in `filetype`. The former retry passed
+  # `gdal = "AAIGrid"`, but `gdal` takes creation options as KEY=VALUE, so
+  # that retry could never have succeeded. It then discarded the underlying
+  # condition and reported a missing AAIGrid driver, which was a guess and in
+  # our case a wrong one. Report what actually happened instead.
   asc_ok <- TRUE
   tryCatch({
-    terra::writeRaster(ts_diff, asc_path, overwrite = TRUE)
+    terra::writeRaster(ts_diff, asc_path, overwrite = TRUE,
+                       filetype = "AAIGrid")
   }, error = function(e) {
     asc_ok <<- FALSE
-    tryCatch({
-      terra::writeRaster(ts_diff, asc_path, overwrite = TRUE, gdal = "AAIGrid")
-      asc_ok <<- TRUE
-    }, error = function(e2) {
-      stop(
-        paste0(
-          "Failed to write ASCII Grid (.asc). Your GDAL/terra build may lack the AAIGrid driver.\n",
-          "GeoTIFF was written to: ", tif_path
-        ),
-        call. = FALSE
-      )
-    })
+    warning(
+      "Could not write the ASCII Grid copy:\n  ", asc_path, "\n  ",
+      conditionMessage(e),
+      "\nThe GeoTIFF was written to ", tif_path,
+      ", which is what the rest of the pipeline reads. Continuing.",
+      call. = FALSE
+    )
   })
 
   # ---- Remove GDAL sidecar files ----
