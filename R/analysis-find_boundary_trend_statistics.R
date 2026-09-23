@@ -182,7 +182,7 @@ find_boundary_trend_statistics <- function(alpha_code) {
       "Processing summary (find_boundary_trend_statistics)",
       f("Timestamp:",     format(Sys.time(), tz = "UTC", usetz = TRUE)),
       f("Alpha code:",    code),
-      f("GAP range:",     gap_range),
+      f("GAP range:",     gap_path),
       f("Buffered poly:", buffer_path),
       f("Interior pos %:", sprintf("%.3f", interior$pos_pct)),
       f("Ring pos %:",     sprintf("%.3f", ring$pos_pct)),

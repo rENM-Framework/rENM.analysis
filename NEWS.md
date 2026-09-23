@@ -1,4 +1,14 @@
 # rENM.analysis 0.2.0.9000
+* `find_boundary_trend_statistics()` — the run log entry never appeared. The
+  log block referenced `gap_range`, which is defined nowhere; the variable
+  holding the shapefile path is `gap_path`. Because the block is wrapped in
+  `try(..., silent = TRUE)`, evaluating that argument threw while the vector
+  was being assembled, which aborted the whole `cat()` before anything was
+  written and discarded the error. The function produced its CSV correctly
+  throughout, so nothing computed was affected; what was missing was the
+  audit trail, on every run for every species since the function was added.
+  Found by `R CMD check`, which reported it as a variable with no visible
+  binding.
 * `find_trend_percentages()` — `percent_positive`, `percent_negative` and
   `percent_zero` are now fractions of area rather than of cell count. The
   area columns were added earlier in this cycle without rebasing the
