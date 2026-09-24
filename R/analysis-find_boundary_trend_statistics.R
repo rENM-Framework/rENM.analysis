@@ -100,7 +100,23 @@ find_boundary_trend_statistics <- function(alpha_code) {
   bump("Resolving GAP range shapefile")
   gap_path <- .gap_range_path(project_dir, code)
 
-  for (f in c(gap_path, buffer_path, trend_path, hs_path)) {
+  # The buffered polygon is written only by find_range_extent(). An extent set
+  # by find_occurrence_extent() or set_extent() produces no range polygon, so
+  # there is no interior to difference a ring against and the comparison is
+  # not merely unavailable but undefined. Skip rather than stop: everything
+  # upstream has already run, create_suitability_trend_summary_table() guards
+  # this same file and simply omits the boundary block, and aborting here
+  # would discard a finished model fit over an optional statistic.
+  if (!file.exists(buffer_path)) {
+    warning("No buffered range polygon at ", buffer_path,
+            ".\n  Boundary statistics need the buffered GAP range that",
+            " find_range_extent() writes, so this step is skipped and the",
+            " report's boundary block will be absent.",
+            call. = FALSE)
+    return(invisible(NULL))
+  }
+
+  for (f in c(gap_path, trend_path, hs_path)) {
     if (!file.exists(f)) stop("Required input not found: ", f, call. = FALSE)
   }
 

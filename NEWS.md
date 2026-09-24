@@ -1,4 +1,14 @@
 # rENM.analysis 0.2.0.9000
+* `find_boundary_trend_statistics()` now skips with a warning when the
+  buffered range polygon is absent, rather than stopping. That polygon is
+  written only by `find_range_extent()`; an extent set by
+  `find_occurrence_extent()` or `set_extent()` produces no range polygon, so
+  there is no interior to difference a ring against and the comparison is
+  undefined rather than merely unavailable. Stopping aborted the whole run
+  from inside `rENM()`, discarding a finished model fit over an optional
+  statistic, and it did so after the expensive modeling had completed.
+  `create_suitability_trend_summary_table()` already guarded the same file and
+  omitted the boundary block, so the report degrades consistently now.
 * `find_boundary_trend_statistics()` — the run log entry never appeared. The
   log block referenced `gap_range`, which is defined nowhere; the variable
   holding the shapefile path is `gap_path`. Because the block is wrapped in
