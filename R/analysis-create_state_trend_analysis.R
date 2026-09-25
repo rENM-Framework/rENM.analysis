@@ -57,10 +57,23 @@
 #'     \item \code{GAP.RANGE.PCT} (percent): share of total CONUS GAP
 #'     area
 #'     \item \code{GAP.RANGE.POS.PCT} (percent): share of the state's GAP
-#'     area with positive trend (raster > 0)
+#'     area \emph{carrying trend data} with positive trend (raster > 0)
 #'     \item \code{GAP.RANGE.NEG.PCT} (percent): share with negative
-#'     trend (raster < 0)
+#'     trend (raster < 0), on the same denominator
+#'     \item \code{GAP.RANGE.DATA.PCT} (percent): share of the state's
+#'     GAP area that carries trend data, and therefore the denominator
+#'     the two figures above are taken over. Below 100 wherever the
+#'     trend raster is \code{NA} inside the range, chiefly over water
+#'     and at the coastal edge
 #'   }
+#'
+#'   The two trend percentages sum to 100 by construction. They are shares
+#'   of the modeled area, not of the state's whole range: a state whose
+#'   range is largely water reports on the land part of it, and
+#'   \code{GAP.RANGE.DATA.PCT} says how much that is. This is the basis
+#'   used range-wide by \code{find_trend_percentages()} and by
+#'   \code{find_boundary_trend_statistics()}, whose rows share two columns
+#'   with these in the report's summary table.
 #'   \item Map construction includes:
 #'   \itemize{
 #'     \item Underlay of trend raster
@@ -352,12 +365,13 @@ create_state_trend_analysis <- function(alpha_code) {
 
     if (is_empty_sf(gap_state_eq)) {
       return(data.frame(
-        STATE             = state_id,
-        GAP.RANGE.AREA    = 0,
-        GAP.RANGE.PCT     = 0,
-        GAP.RANGE.POS.PCT = 0,
-        GAP.RANGE.NEG.PCT = 0,
-        stringsAsFactors  = FALSE
+        STATE              = state_id,
+        GAP.RANGE.AREA     = 0,
+        GAP.RANGE.PCT      = 0,
+        GAP.RANGE.POS.PCT  = 0,
+        GAP.RANGE.NEG.PCT  = 0,
+        GAP.RANGE.DATA.PCT = 0,
+        stringsAsFactors   = FALSE
       ))
     }
 
@@ -377,25 +391,41 @@ create_state_trend_analysis <- function(alpha_code) {
 
     if (!isTRUE(overlaps)) {
       return(data.frame(
-        STATE             = state_id,
-        GAP.RANGE.AREA    = round(area_gap_m2 / 1e6, 3),
-        GAP.RANGE.PCT     = round(pct_total, 3),
-        GAP.RANGE.POS.PCT = NA_real_,
-        GAP.RANGE.NEG.PCT = NA_real_,
-        stringsAsFactors  = FALSE
+        STATE              = state_id,
+        GAP.RANGE.AREA     = round(area_gap_m2 / 1e6, 3),
+        GAP.RANGE.PCT      = round(pct_total, 3),
+        GAP.RANGE.POS.PCT  = NA_real_,
+        GAP.RANGE.NEG.PCT  = NA_real_,
+        GAP.RANGE.DATA.PCT = NA_real_,
+        stringsAsFactors   = FALSE
       ))
     }
 
     r_state  <- terra::mask(terra::crop(trend_eq, gap_spat), gap_spat)
     ca_state <- terra::mask(terra::crop(cell_area, gap_spat), gap_spat)
 
+    # Percentages are taken over the range area that carries trend data, not
+    # over the state's whole range. The two differ wherever the trend raster
+    # is NA inside the range -- water and the coastal edge, mainly -- and
+    # those cells would otherwise sit in the denominator and in neither
+    # numerator, so the two percentages fell short of 100 without saying why.
+    # This is the basis used range-wide by find_trend_percentages() and by
+    # find_boundary_trend_statistics(), whose interior and ring rows print in
+    # the same two columns of the report's summary table as these state rows;
+    # before this, one table mixed both conventions with nothing marking the
+    # difference. GAP.RANGE.DATA.PCT records the coverage so the shortfall is
+    # visible rather than merely absent.
     area_total_m2 <- trySuppressWarnings(
-      terra::global(ca_state, "sum", na.rm = TRUE)[1, 1]
+      terra::global(ca_state * !is.na(r_state), "sum", na.rm = TRUE)[1, 1]
     )
 
     if (is.null(area_total_m2) || is.na(area_total_m2) || area_total_m2 == 0) {
-      pos_pct <- 0
-      neg_pct <- 0
+      # No cell of this state's range carries a trend value, so the shares are
+      # undefined rather than zero. NA matches the no-overlap branch above and
+      # find_boundary_trend_statistics(), which returns NA on an empty zone.
+      pos_pct  <- NA_real_
+      neg_pct  <- NA_real_
+      data_pct <- 0
     } else {
       pos_mask <- r_state > 0
       neg_mask <- r_state < 0
@@ -410,17 +440,28 @@ create_state_trend_analysis <- function(alpha_code) {
       )
       if (is.na(area_neg)) area_neg <- 0
 
-      pos_pct <- (area_pos / area_total_m2) * 100
-      neg_pct <- (area_neg / area_total_m2) * 100
+      area_range_m2 <- trySuppressWarnings(
+        terra::global(ca_state, "sum", na.rm = TRUE)[1, 1]
+      )
+
+      pos_pct  <- (area_pos / area_total_m2) * 100
+      neg_pct  <- (area_neg / area_total_m2) * 100
+      data_pct <- if (!is.null(area_range_m2) && !is.na(area_range_m2) &&
+                      area_range_m2 > 0) {
+        (area_total_m2 / area_range_m2) * 100
+      } else {
+        NA_real_
+      }
     }
 
     data.frame(
-      STATE             = state_id,
-      GAP.RANGE.AREA    = round(area_gap_m2 / 1e6, 3),
-      GAP.RANGE.PCT     = round(pct_total, 3),
-      GAP.RANGE.POS.PCT = round(pos_pct, 3),
-      GAP.RANGE.NEG.PCT = round(neg_pct, 3),
-      stringsAsFactors  = FALSE
+      STATE              = state_id,
+      GAP.RANGE.AREA     = round(area_gap_m2 / 1e6, 3),
+      GAP.RANGE.PCT      = round(pct_total, 3),
+      GAP.RANGE.POS.PCT  = round(pos_pct, 3),
+      GAP.RANGE.NEG.PCT  = round(neg_pct, 3),
+      GAP.RANGE.DATA.PCT = round(data_pct, 3),
+      stringsAsFactors   = FALSE
     )
   })
 

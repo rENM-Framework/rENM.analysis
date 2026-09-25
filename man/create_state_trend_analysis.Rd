@@ -84,10 +84,23 @@ the run
 \item \code{GAP.RANGE.PCT} (percent): share of total CONUS GAP
 area
 \item \code{GAP.RANGE.POS.PCT} (percent): share of the state's GAP
-area with positive trend (raster > 0)
+area \emph{carrying trend data} with positive trend (raster > 0)
 \item \code{GAP.RANGE.NEG.PCT} (percent): share with negative
-trend (raster < 0)
+trend (raster < 0), on the same denominator
+\item \code{GAP.RANGE.DATA.PCT} (percent): share of the state's
+GAP area that carries trend data, and therefore the denominator
+the two figures above are taken over. Below 100 wherever the
+trend raster is \code{NA} inside the range, chiefly over water
+and at the coastal edge
 }
+
+The two trend percentages sum to 100 by construction. They are shares
+of the modeled area, not of the state's whole range: a state whose
+range is largely water reports on the land part of it, and
+\code{GAP.RANGE.DATA.PCT} says how much that is. This is the basis
+used range-wide by \code{find_trend_percentages()} and by
+\code{find_boundary_trend_statistics()}, whose rows share two columns
+with these in the report's summary table.
 \item Map construction includes:
 \itemize{
 \item Underlay of trend raster

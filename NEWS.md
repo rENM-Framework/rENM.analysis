@@ -1,4 +1,31 @@
 # rENM.analysis 0.2.0.9000
+* `create_state_trend_analysis()` — `GAP.RANGE.POS.PCT` and
+  `GAP.RANGE.NEG.PCT` are now taken over the state's range area that
+  carries trend data, not over its whole range. The denominator summed
+  every range cell while the numerators dropped cells where the trend
+  raster is NA, so the two percentages fell short of 100 with nothing
+  saying why. Across twelve species that affected 220 of 650 rows, worst
+  case Western Meadowlark in Michigan at 96.153, and the shortfall tracks
+  water: Michigan, New York and Rhode Island are the extremes. Not merely
+  cosmetic, because `create_suitability_trend_summary_table()` appends the
+  interior and ring rows from `find_boundary_trend_statistics()` into the
+  same "Positive %" and "Negative %" columns, and those were already taken
+  over the data-carrying area. One printed table was mixing two
+  conventions, showing state rows summing to 96 above boundary rows
+  summing to 100, in the same columns.
+  Gained `GAP.RANGE.DATA.PCT`, the share of the state's range carrying
+  trend data, so the coverage is visible rather than merely absent; it is
+  the denominator the other two are taken over. A state whose range has no
+  trend data at all now reports NA for both percentages rather than 0,
+  matching the existing no-overlap branch and the boundary function: the
+  shares are undefined there, not zero.
+  Because no cell in any of the twelve trend rasters has a slope of
+  exactly zero, positive and negative areas sum to the data area
+  identically, so the new percentages sum to exactly 100 by construction
+  and the change is a pure renormalization of the old pair. Existing
+  values shift: 78 of 275 state rows move, 3 by more than a point, the
+  largest 1.764 points. Reports built from these CSVs should be
+  regenerated.
 * `find_boundary_trend_statistics()` now skips with a warning when the
   buffered range polygon is absent, rather than stopping. That polygon is
   written only by `find_range_extent()`; an extent set by
