@@ -1,4 +1,19 @@
 # rENM.analysis 0.2.0.9000
+* `find_boundary_trend_statistics()` gained `med_slope` and `med_abs_slope`
+  per zone. `pos_pct` counts the area whose slope is above zero and says
+  nothing about how far above, so a zone whose slopes hover around zero
+  reports a precise-looking percentage near 50 that carries no signal.
+  Across the twelve pilot species the ring's median magnitude ran from 4 to
+  70 percent of the interior's: Loggerhead Shrike's ring is 20 percent
+  positive at 70 percent of the interior's magnitude, a declining periphery,
+  while Eastern Meadowlark's is 51 percent positive at a median slope of
+  -3e-07, which over the study window is no change at all. The narrative for
+  that species had already shipped saying "Both zones are majority positive".
+  The percentages are unchanged; what was missing was the means to tell the
+  two cases apart. Positivity was also found to fall steadily from the range
+  core to its boundary rather than being uniform inside, so the interior
+  figure is an average over a gradient; reporting that profile is left to a
+  later release.
 * `create_state_trend_analysis()` — `GAP.RANGE.POS.PCT` and
   `GAP.RANGE.NEG.PCT` are now taken over the state's range area that
   carries trend data, not over its whole range. The denominator summed

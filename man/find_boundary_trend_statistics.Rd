@@ -13,7 +13,8 @@ find_boundary_trend_statistics(alpha_code)
 Invisibly returns a data.frame with one row per zone
 (\code{"interior"} and \code{"ring"}) and columns \code{zone},
 \code{area_km2}, \code{data_area_km2}, \code{pos_pct}, \code{neg_pct},
-\code{hotspot_area_km2}, \code{hotspot_pct}.
+\code{med_slope}, \code{med_abs_slope}, \code{hotspot_area_km2},
+\code{hotspot_pct}.
 }
 \description{
 Compares trend behavior within the species USGS GAP range against the
@@ -52,6 +53,17 @@ boundary, diluting the signal the statistic exists to detect.
 \item \code{runs/<alpha_code>/Trends/suitability/<alpha_code>-Suitability-Trend.tif}
 \item \code{runs/<alpha_code>/Trends/suitability/<alpha_code>-Hot-Spot-Mask.tif}
 }
+
+\strong{Read the percentages with the magnitudes}
+\code{pos_pct} counts the area whose slope is above zero and says nothing
+about how far above. A zone whose slopes hover around zero therefore
+reports a precise-looking percentage near 50 that carries no signal at
+all. \code{med_slope} and \code{med_abs_slope} are given so the two cases
+can be told apart: a ring at 20 percent positive whose median magnitude is
+comparable to the interior's is a declining periphery, while a ring at 51
+percent whose median slope is of order 1e-07 is an absence of evidence
+rather than evidence of balance. Across the twelve pilot species the ring
+median magnitude ran from 4 to 70 percent of the interior's.
 
 \strong{How areas are measured}
 Cells straddling a zone boundary contribute only the fraction of their

@@ -37,6 +37,17 @@
 #'   \item \code{runs/<alpha_code>/Trends/suitability/<alpha_code>-Hot-Spot-Mask.tif}
 #' }
 #'
+#' \strong{Read the percentages with the magnitudes}
+#' \code{pos_pct} counts the area whose slope is above zero and says nothing
+#' about how far above. A zone whose slopes hover around zero therefore
+#' reports a precise-looking percentage near 50 that carries no signal at
+#' all. \code{med_slope} and \code{med_abs_slope} are given so the two cases
+#' can be told apart: a ring at 20 percent positive whose median magnitude is
+#' comparable to the interior's is a declining periphery, while a ring at 51
+#' percent whose median slope is of order 1e-07 is an absence of evidence
+#' rather than evidence of balance. Across the twelve pilot species the ring
+#' median magnitude ran from 4 to 70 percent of the interior's.
+#'
 #' \strong{How areas are measured}
 #' Cells straddling a zone boundary contribute only the fraction of their
 #' area lying inside it, matching \code{create_hot_spot_map()}. Percentages
@@ -48,7 +59,8 @@
 #' @return Invisibly returns a data.frame with one row per zone
 #'   (\code{"interior"} and \code{"ring"}) and columns \code{zone},
 #'   \code{area_km2}, \code{data_area_km2}, \code{pos_pct}, \code{neg_pct},
-#'   \code{hotspot_area_km2}, \code{hotspot_pct}.
+#'   \code{med_slope}, \code{med_abs_slope}, \code{hotspot_area_km2},
+#'   \code{hotspot_pct}.
 #'
 #' @seealso \code{\link{create_hot_spot_map}},
 #'   \code{\link[rENM.data]{find_range_extent}}
@@ -58,6 +70,7 @@
 #' @importFrom terra rast crs vect rasterize cellSize global project resample
 #' @importFrom terra same.crs compareGeom
 #' @importFrom utils read.csv
+#' @importFrom stats median
 #' @importFrom readr write_csv
 #'
 #' @examples
@@ -166,12 +179,33 @@ find_boundary_trend_statistics <- function(alpha_code) {
 
     pct <- function(x) if (data_area > 0) 100 * x / data_area else NA_real_
 
+    # Typical slope in the zone, alongside the sign counts. pos_pct counts
+    # cells above zero and says nothing about how far above, so a zone whose
+    # slopes hover around zero reports a precise-looking percentage near 50
+    # that carries no signal. Measured across the twelve pilot species, ring
+    # slopes are typically well under a third the magnitude of interior
+    # slopes, and for several species the ring median is of order 1e-5 to
+    # 1e-7 suitability per year -- a total change over the study window too
+    # small to mean anything, reported as "50.88% positive". These two
+    # columns are what separates that case from a real one: Loggerhead
+    # Shrike's ring is 20% positive at 70% of its interior's magnitude,
+    # which is a declining periphery, and Eastern Meadowlark's is 51%
+    # positive at a median of -3e-07, which is nothing at all.
+    cov_v   <- terra::values(cov,   mat = FALSE)
+    trend_v <- terra::values(trend, mat = FALSE)
+    sel     <- !is.na(cov_v) & cov_v > 0 & !is.na(trend_v)
+    zv      <- trend_v[sel]
+    med_slope     <- if (length(zv)) stats::median(zv)      else NA_real_
+    med_abs_slope <- if (length(zv)) stats::median(abs(zv)) else NA_real_
+
     data.frame(
       zone             = label,
       area_km2         = area,
       data_area_km2    = data_area,
       pos_pct          = pct(pos_area),
       neg_pct          = pct(neg_area),
+      med_slope        = med_slope,
+      med_abs_slope    = med_abs_slope,
       hotspot_area_km2 = hot_area,
       hotspot_pct      = pct(hot_area),
       stringsAsFactors = FALSE
