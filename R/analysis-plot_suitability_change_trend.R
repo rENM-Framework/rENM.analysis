@@ -1,8 +1,10 @@
 #' Plot climatic suitability change trend
 #'
 #' Create a publication-ready map of climatic suitability change trend
-#' values using a diverging color scheme. Positive values indicate
-#' acceleration, while negative values indicate deceleration.
+#' values using a diverging color scheme. Positive values mean successive
+#' changes grew more positive (gains strengthening or losses easing);
+#' negative values mean they grew more negative (gains fading or losses
+#' steepening).
 #'
 #' @details
 #' This function is part of the rENM framework's processing pipeline
@@ -209,7 +211,7 @@ plot_suitability_change_trend <- function(alpha_code, raster_file, zero_band_fra
     ggplot2::coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
     ggplot2::labs(
       title    = paste(code, "Climatic Suitability Change Trend (1980-2020)"),
-      subtitle = "Suitability rate-of-change trend (acceleration/deceleration)",
+      subtitle = "Green = successive changes growing more positive; red = more negative",
       x = "Longitude",
       y = "Latitude"
     ) +

@@ -1,8 +1,8 @@
 #' Create climatic suitability change map
 #'
 #' Automate the full workflow for generating a species climatic
-#' suitability change trend map, essentially a view of suitability trend
-#' acceleration and deceleration.
+#' suitability change trend map: where successive changes in suitability
+#' grew more positive and where they grew more negative.
 #'
 #' @details
 #' This function is part of the rENM framework's processing pipeline
@@ -17,9 +17,11 @@
 #' calls \code{plot_suitability_change_trend()} to visualize these as a
 #' map and save a .png image in the project directory.
 #'
-#' The resulting map depicts areas of increasing or decreasing
-#' suitability change rate (acceleration or deceleration) across the
-#' species range.
+#' The resulting map shows where successive changes grew more positive
+#' (gains strengthening or losses easing) and where they grew more
+#' negative (gains fading or losses steepening) across the modeled extent.
+#' The sign alone does not say whether suitability rose or fell; read it
+#' with the suitability trend map.
 #'
 #' \strong{Inputs}
 #' \itemize{

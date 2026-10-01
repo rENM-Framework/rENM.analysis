@@ -1,8 +1,11 @@
 #' Find climatic suitability change trend
 #'
 #' Builds a multi-year prediction stack for a species (by alpha code)
-#' and computes robust Theil-Sen trend layers representing suitability
-#' change over time (i.e., acceleration or deceleration).
+#' and computes robust Theil-Sen trend layers, including the suitability
+#' change trend: the trend in successive changes in suitability. A positive
+#' change trend means successive changes grew more positive (gains
+#' strengthened or losses eased); a negative one means they grew more
+#' negative (gains faded or losses steepened).
 #'
 #' @details
 #' \strong{Inputs}
@@ -24,7 +27,7 @@
 #'     \item \code{ts_diff}: trend across difference stack
 #'   }
 #'   \item \code{ts_diff} represents the suitability change trend
-#'   (rate-of-change in suitability over time)
+#'   (the trend in the rate of change, not the rate of change itself)
 #' }
 #'
 #' \strong{Methods}

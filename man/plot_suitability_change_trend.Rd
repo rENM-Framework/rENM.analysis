@@ -31,8 +31,10 @@ Side effects:
 }
 \description{
 Create a publication-ready map of climatic suitability change trend
-values using a diverging color scheme. Positive values indicate
-acceleration, while negative values indicate deceleration.
+values using a diverging color scheme. Positive values mean successive
+changes grew more positive (gains strengthening or losses easing);
+negative values mean they grew more negative (gains fading or losses
+steepening).
 }
 \details{
 This function is part of the rENM framework's processing pipeline

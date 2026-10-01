@@ -9,7 +9,8 @@
 #' @details
 #' Hot spots are defined as cells where the baseline suitability trend
 #' (A) is negative \strong{and} the suitability change trend (B) is
-#' positive.
+#' also negative: suitability is falling, and each successive change is
+#' more negative than the last.
 #'
 #' Per-state statistics:
 #' \itemize{

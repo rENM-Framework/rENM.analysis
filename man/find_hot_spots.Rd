@@ -17,16 +17,23 @@ Side effects:
 }
 }
 \description{
-Create a binary hot-spot raster identifying cells where baseline
-suitability trend is negative and suitability change trend is
-positive. Hot-spot cells are coded as 1 and all others as 0.
+Create a binary hot-spot raster identifying cells where the baseline
+suitability trend is negative and the suitability change trend is also
+negative. Hot-spot cells are coded as 1 and all others as 0.
 }
 \details{
 \strong{Pipeline context}
 Creates a binary hot-spot raster identifying cells where:
 A (<alpha_code>-Suitability-Trend.tif) < 0 AND
-B (<alpha_code>-Suitability-Difference-Trend.tif) > 0.
+B (<alpha_code>-Suitability-Change-Trend.tif) < 0.
 Hot-spot cells are coded 1; all other cells are coded 0.
+
+\strong{Why both signs are negative}
+B is the Theil-Sen slope of successive differences, each a later
+suitability minus an earlier one. A negative B means successive changes
+grew more negative. Where A is also negative, losses are steepening.
+A positive B on a declining cell means the opposite: losses are easing.
+Versions before 0.2.0 tested B > 0 and so mapped easing declines.
 
 \strong{Inputs}
 \itemize{
@@ -44,10 +51,10 @@ Hot-spot cells are coded 1; all other cells are coded 0.
 \item Input rasters are read from:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 \code{<alpha_code>-Suitability-Trend.tif}
-\code{<alpha_code>-Suitability-Difference-Trend.tif}
+\code{<alpha_code>-Suitability-Change-Trend.tif}
 \item If grids differ in extent, resolution, or CRS, raster B is
 resampled or projected to match raster A.
-\item Binary mask is computed where (A < 0) AND (B > 0).
+\item Binary mask is computed where (A < 0) AND (B < 0).
 }
 
 \strong{Data requirements}
@@ -55,10 +62,10 @@ resampled or projected to match raster A.
 \item Input rasters located at:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
 \code{<alpha_code>-Suitability-Trend.tif}
-\code{<alpha_code>-Suitability-Difference-Trend.tif}
+\code{<alpha_code>-Suitability-Change-Trend.tif}
 \item Output written to:
 \code{<project_dir>/runs/<alpha_code>/Trends/suitability/}
-\code{<alpha_code>-CCEI-Baseline.tif}
+\code{<alpha_code>-Hot-Spot-Mask.tif}
 }
 }
 \examples{

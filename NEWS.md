@@ -1,4 +1,35 @@
 # rENM.analysis 0.2.0.9000
+* `find_hot_spots()` mapped the wrong cells. It masked a negative
+  suitability trend with a positive change trend, `(A < 0) & (B > 0)`. The
+  change trend is the Theil-Sen slope of successive differences, each a
+  later suitability minus an earlier one, so a positive value on a
+  declining cell means losses are easing. The mask selected declines that
+  were slowing, the opposite of the documented definition. It now tests
+  `(A < 0) & (B < 0)`: suitability falling, and each change more negative
+  than the last. The error dates from the first commit and is in v0.1.0.
+  On the CASP, EAME and GRRO pilot runs the old and new masks share no
+  cells. Cells under the old mask lost suitability fastest before 2000 and
+  then flattened (CASP -0.0026 per year in 1980-2000, -0.0002 in
+  2000-2020); cells under the new mask were flat or rising before 2000 and
+  lost suitability after it (CASP +0.00001, then -0.0022). State figures
+  move substantially: Eastern Meadowlark in Florida from 7.23 to 92.29
+  percent of range, Greater Roadrunner in Arizona from 61.74 to 26.10.
+  Every consumer reads the mask file, so `create_hot_spot_map()`, its state
+  statistics, and the hot-spot columns of
+  `find_boundary_trend_statistics()` change with it. Range areas and all
+  other boundary columns are unchanged. The map subtitle, the report
+  caption and the GenAI prompts already described accelerating declines
+  and now match what is mapped.
+* The change trend is no longer described as "acceleration" and
+  "deceleration". Those words were used in the signed sense, positive for
+  acceleration, while hot spots use them in the magnitude sense, so a hot
+  spot sat in an area the same report called decelerating. Help text and
+  the change-trend map subtitle now say what the sign means: positive when
+  successive changes grew more positive (gains strengthening or losses
+  easing), negative when they grew more negative (gains fading or losses
+  steepening). The `find_hot_spots()` help also named a nonexistent input
+  file and the wrong output file; both are corrected.
+
 * `find_boundary_trend_statistics()` gained `med_slope` and `med_abs_slope`
   per zone. `pos_pct` counts the area whose slope is above zero and says
   nothing about how far above, so a zone whose slopes hover around zero
