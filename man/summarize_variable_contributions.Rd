@@ -62,6 +62,11 @@ rENM_project_dir().
 \item Eligibility rule (2025-09): Only variables that appear
 (non-NA contribution) in 3 or more of the years 1980-2020 are
 considered for \code{top_n} ranking and plotting.
+\item Eligible variables are ranked by their average contribution over
+all intervals, an interval in which the variable was not selected
+counting as zero. Ranking by the mean over selected intervals only
+(\code{mean_pct}, used before v0.2.0) let a variable chosen in three
+intervals outrank one chosen in all nine at a similar contribution.
 \item Adds Region of Practical Equivalence (ROPE) calculations
 for the Bayesian slope (and optional intercept).
 }

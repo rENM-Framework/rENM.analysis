@@ -253,7 +253,9 @@ gather_variable_contributions <- function(alpha_code) {
     }
 
     rows[[length(rows) + 1L]] <- data.frame(
-      Variable = as.character(v),
+      # PI-Ranked files pad the name with a space before the tab; trimmed so
+      # downstream files match variable names exactly.
+      Variable = trimws(as.character(v)),
       Year     = as.integer(yr),
       Percent  = as.numeric(p),
       stringsAsFactors = FALSE

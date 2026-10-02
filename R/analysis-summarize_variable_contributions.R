@@ -21,6 +21,11 @@
 #'   \item Eligibility rule (2025-09): Only variables that appear
 #'   (non-NA contribution) in 3 or more of the years 1980-2020 are
 #'   considered for \code{top_n} ranking and plotting.
+#'   \item Eligible variables are ranked by their average contribution over
+#'   all intervals, an interval in which the variable was not selected
+#'   counting as zero. Ranking by the mean over selected intervals only
+#'   (\code{mean_pct}, used before v0.2.0) let a variable chosen in three
+#'   intervals outrank one chosen in all nine at a similar contribution.
 #'   \item Adds Region of Practical Equivalence (ROPE) calculations
 #'   for the Bayesian slope (and optional intercept).
 #' }
@@ -224,14 +229,18 @@ summarize_variable_contributions <- function(alpha_code,
   ord <- order(year_nums); year_cols <- year_cols[ord]; year_nums <- year_nums[ord]
   message("    Detected years: ", paste(year_nums, collapse = ", "))
 
-  # ---- [6/13] eligibility (>=3 years) + select top_n by mean_pct ------------
-  message(">>> [6/13] Applying eligibility rule (present in >= 3 years) and ranking by mean_pct...")
+  # ---- [6/13] eligibility (>=3 years) + select top_n by series mean -------
+  message(">>> [6/13] Applying eligibility rule (present in >= 3 years) and ranking by average contribution over all intervals...")
   df$years_present <- rowSums(!is.na(df[, year_cols, drop = FALSE]))
+  # Average over the whole time series, an unselected interval counting as
+  # zero, which is what the report captions describe. mean_pct averages over
+  # selected intervals only and favoured variables chosen in few of them.
+  df$series_mean <- rowSums(df[, year_cols, drop = FALSE], na.rm = TRUE) / length(year_cols)
   df_eligible <- df[df$years_present >= included_years, , drop = FALSE]
   if (nrow(df_eligible) == 0L) stop("No variables meet the eligibility rule (present in >= 3 years).")
 
   df_ranked <- df_eligible |>
-    dplyr::arrange(dplyr::desc(mean_pct)) |>
+    dplyr::arrange(dplyr::desc(series_mean)) |>
     dplyr::mutate(rank = dplyr::row_number())
 
   n_available <- nrow(df_ranked)
@@ -240,7 +249,7 @@ summarize_variable_contributions <- function(alpha_code,
 
   top_vars <- df_ranked |>
     dplyr::slice_head(n = n_use) |>
-    dplyr::select(Variable, mean_pct, rank, years_present)
+    dplyr::select(Variable, mean_pct, series_mean, rank, years_present)
 
   message("    Eligible variables: ", n_available,
           " | Selected (top ", n_use, "): ",
@@ -258,7 +267,7 @@ summarize_variable_contributions <- function(alpha_code,
     dplyr::mutate(
       Variable = factor(
         Variable,
-        levels = top_vars |> dplyr::arrange(dplyr::desc(mean_pct)) |> dplyr::pull(Variable)
+        levels = top_vars |> dplyr::arrange(dplyr::desc(series_mean)) |> dplyr::pull(Variable)
       ),
       YearNum  = as.integer(stringr::str_replace(Year, "^Y", "")),
       Year     = factor(Year, levels = year_cols, labels = as.character(year_nums))

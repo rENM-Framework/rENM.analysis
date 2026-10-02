@@ -1,4 +1,19 @@
 # rENM.analysis 0.2.0.9000
+* `summarize_variable_contributions()` now ranks the top variables by their
+  average contribution over all intervals, an interval in which a variable
+  was not selected counting as zero. It ranked by the mean over selected
+  intervals only (`mean_pct`), so a variable chosen in three intervals
+  outranked one chosen in all nine at a similar level, and the report
+  captions, which describe "average contribution to the overall time
+  series", did not match. In the ten CASP runs swgnt was selected in 7 to 9
+  of 9 intervals at about 10 percent yet reached the top 10 in only 4; on
+  seed 42 it now ranks seventh, and qv2m, selected in three intervals,
+  drops out. The three-interval eligibility rule is unchanged, since the
+  per-variable regressions need at least three points.
+* `gather_variable_contributions()` trims variable names. The PI-Ranked
+  files pad each name with a space before the tab, so every name in
+  `<CODE>-Variables-AllYears.csv` ended in one and exact matching failed.
+
 * `summarize_variable_contributions()` no longer marks variables whose
   contribution slope has a probability of direction of at least 85 percent.
   Legend labels carried stars and a (+)/(-) sign and those lines were drawn
