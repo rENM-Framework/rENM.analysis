@@ -71,6 +71,12 @@
 #' symmetrically.
 #' @param rope_intercept Numeric. Two-element vector defining ROPE bounds
 #' for Bayesian intercept, or NULL (default) to disable.
+#' @param mark_trends Logical. When \code{TRUE}, legend labels carry stars and a
+#'   (+)/(-) sign for variables whose contribution slope has a probability of
+#'   direction of at least 85 percent, and their lines are drawn thicker.
+#'   Default \code{FALSE}: every variable is drawn alike. Single-run directional trends rarely recur: across six species and
+#'   35 seeded runs, only one variable's flagged trend (CASP bio8, 9 of 10
+#'   runs) recurred in at least 80 percent of runs.
 #'
 #' @return Invisibly returns NULL. Side effects:
 #' \itemize{
@@ -92,7 +98,8 @@
 summarize_variable_contributions <- function(alpha_code,
                                              top_n = 10,
                                              rope_slope = c(-0.05, 0.05),
-                                             rope_intercept = NULL) {
+                                             rope_intercept = NULL,
+                                             mark_trends = FALSE) {
   start_time <- Sys.time()
 
   # number of years to include in trend analyses
@@ -440,6 +447,9 @@ summarize_variable_contributions <- function(alpha_code,
                          ifelse(lw_df$slope_mean < 0, "(-)", "")),
                   "")
   star_sign <- paste0(stars, signs)
+  # Off by default: a trend flagged in one run rarely recurs at another seed,
+  # so marking it presents a single draw as a finding.
+  if (!isTRUE(mark_trends)) star_sign[] <- ""
 
   # Label map for legends (markdown-capable if ggtext is available)
   base_names <- as.character(lw_df$Variable)
@@ -453,7 +463,7 @@ summarize_variable_contributions <- function(alpha_code,
   lab_map <- stats::setNames(lab_vals, as.character(lw_df$Variable))
 
   # Thicker lines for any starred tier (PD >=85) on BR plots
-  lw_vals <- ifelse(!is.na(pdp) & pdp >= 85, 2.75, 0.50)
+  lw_vals <- if (isTRUE(mark_trends)) ifelse(!is.na(pdp) & pdp >= 85, 2.75, 0.50) else rep(1.2, length(pdp))
   lw_map  <- stats::setNames(lw_vals, as.character(lw_df$Variable))
 
   # ---- [11/13] Create plots (lab_map now defined) ----------------------------

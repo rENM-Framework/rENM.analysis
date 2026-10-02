@@ -8,7 +8,8 @@ summarize_variable_contributions(
   alpha_code,
   top_n = 10,
   rope_slope = c(-0.05, 0.05),
-  rope_intercept = NULL
+  rope_intercept = NULL,
+  mark_trends = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,13 @@ symmetrically.}
 
 \item{rope_intercept}{Numeric. Two-element vector defining ROPE bounds
 for Bayesian intercept, or NULL (default) to disable.}
+
+\item{mark_trends}{Logical. When \code{TRUE}, legend labels carry stars and a
+(+)/(-) sign for variables whose contribution slope has a probability of
+direction of at least 85 percent, and their lines are drawn thicker.
+Default \code{FALSE}: every variable is drawn alike. Single-run directional trends rarely recur: across six species and
+35 seeded runs, only one variable's flagged trend (CASP bio8, 9 of 10
+runs) recurred in at least 80 percent of runs.}
 }
 \value{
 Invisibly returns NULL. Side effects:

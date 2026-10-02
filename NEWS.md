@@ -1,4 +1,14 @@
 # rENM.analysis 0.2.0.9000
+* `summarize_variable_contributions()` no longer marks variables whose
+  contribution slope has a probability of direction of at least 85 percent.
+  Legend labels carried stars and a (+)/(-) sign and those lines were drawn
+  thicker. Across six species and 35 seeded runs, only one
+  flagged trend recurred in at least 80 percent of a species' runs (CASP
+  bio8, declining in 9 of 10); the rest appeared at one seed and not the
+  next, so marking them presented a single draw as a finding. The marking remains available as
+  `mark_trends = TRUE`, for a later multi-run version that can mark only
+  trends recurring across seeds. Every line is now drawn at one width.
+
 * `find_hot_spots()` mapped the wrong cells. It masked a negative
   suitability trend with a positive change trend, `(A < 0) & (B > 0)`. The
   change trend is the Theil-Sen slope of successive differences, each a
