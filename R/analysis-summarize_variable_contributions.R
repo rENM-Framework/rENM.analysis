@@ -26,6 +26,11 @@
 #'   counting as zero. Ranking by the mean over selected intervals only
 #'   (\code{mean_pct}, used before v0.2.0) let a variable chosen in three
 #'   intervals outrank one chosen in all nine at a similar contribution.
+#'   \item Each Bayesian fit records convergence diagnostics in the BR-Stats
+#'   file: \code{rhat_max}, \code{ess_bulk_min}, \code{ess_tail_min},
+#'   \code{n_divergent}, and \code{fit_ok}, which is \code{TRUE} when R-hat
+#'   is at most 1.01, both effective sample sizes are at least 400, and no
+#'   transition diverged.
 #'   \item Adds Region of Practical Equivalence (ROPE) calculations
 #'   for the Bayesian slope (and optional intercept).
 #' }
@@ -326,6 +331,21 @@ summarize_variable_contributions <- function(alpha_code,
         prior_intercept = rstanarm::normal(0, 10, autoscale = TRUE),
         chains = 4, iter = 2000, seed = 1234, refresh = 0
       )
+      # Convergence diagnostics. These fits use 3 to 9 points, and in 35
+      # seeded validation runs Stan reported divergent transitions or low
+      # effective sample size for some of them with no record of which
+      # variable; a slope and PD from such a fit should not be read at face
+      # value. Thresholds follow Vehtari et al. (2021): R-hat <= 1.01, bulk
+      # and tail ESS >= 400, and no divergent transitions.
+      dsum <- posterior::summarise_draws(posterior::as_draws_array(as.array(fit)),
+                                         "rhat", "ess_bulk", "ess_tail")
+      rhat_max     <- max(dsum$rhat, na.rm = TRUE)
+      ess_bulk_min <- min(dsum$ess_bulk, na.rm = TRUE)
+      ess_tail_min <- min(dsum$ess_tail, na.rm = TRUE)
+      n_divergent  <- rstan::get_num_divergent(fit$stanfit)
+      fit_ok <- is.finite(rhat_max) && rhat_max <= 1.01 &&
+        ess_bulk_min >= 400 && ess_tail_min >= 400 && n_divergent == 0
+
       post <- as.data.frame(as.matrix(fit))
       a_draw <- post[["(Intercept)"]]
       b_draw <- post[["YearNum"]]
@@ -381,6 +401,11 @@ summarize_variable_contributions <- function(alpha_code,
           rope_intercept_pct   = rope_int_pct,
           rope_intercept_decision = rope_int_dec,
           equation_mean     = eq_mean,
+          rhat_max          = rhat_max,
+          ess_bulk_min      = ess_bulk_min,
+          ess_tail_min      = ess_tail_min,
+          n_divergent       = n_divergent,
+          fit_ok            = fit_ok,
           stringsAsFactors  = FALSE
         )
       )
@@ -403,12 +428,19 @@ summarize_variable_contributions <- function(alpha_code,
           rope_slope_lower=NA_real_, rope_slope_upper=NA_real_, rope_slope_pct=NA_real_, rope_slope_decision=NA_character_,
           rope_intercept_lower=NA_real_, rope_intercept_upper=NA_real_, rope_intercept_pct=NA_real_, rope_intercept_decision=NA_character_,
           equation_mean=NA_character_,
+          rhat_max=NA_real_, ess_bulk_min=NA_real_, ess_tail_min=NA_real_,
+          n_divergent=NA_integer_, fit_ok=NA,
           stringsAsFactors = FALSE
         )
       )
     }
   })
   stats_br_df <- do.call(rbind, lapply(bayes_list, `[[`, "summary"))
+  bad_fit <- stats_br_df$Variable[!is.na(stats_br_df$fit_ok) & !stats_br_df$fit_ok]
+  if (length(bad_fit)) {
+    message("    Convergence diagnostics flagged: ", paste(bad_fit, collapse = ", "),
+            " (see rhat_max, ess_bulk_min, ess_tail_min, n_divergent in BR-Stats)")
+  }
 
   # Posterior predictions per year
   message(">>> Preparing Bayesian mean lines and 95% ribbons...")

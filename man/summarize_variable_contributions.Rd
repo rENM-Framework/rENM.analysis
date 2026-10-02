@@ -67,6 +67,11 @@ all intervals, an interval in which the variable was not selected
 counting as zero. Ranking by the mean over selected intervals only
 (\code{mean_pct}, used before v0.2.0) let a variable chosen in three
 intervals outrank one chosen in all nine at a similar contribution.
+\item Each Bayesian fit records convergence diagnostics in the BR-Stats
+file: \code{rhat_max}, \code{ess_bulk_min}, \code{ess_tail_min},
+\code{n_divergent}, and \code{fit_ok}, which is \code{TRUE} when R-hat
+is at most 1.01, both effective sample sizes are at least 400, and no
+transition diverged.
 \item Adds Region of Practical Equivalence (ROPE) calculations
 for the Bayesian slope (and optional intercept).
 }

@@ -1,4 +1,17 @@
 # rENM.analysis 0.2.0.9000
+* `summarize_variable_contributions()` records convergence diagnostics for
+  each per-variable Bayesian fit in the BR-Stats file: `rhat_max`,
+  `ess_bulk_min`, `ess_tail_min`, `n_divergent` and `fit_ok`, the last
+  `TRUE` when R-hat is at most 1.01, both effective sample sizes are at
+  least 400 and no transition diverged (Vehtari et al. 2021). These fits use
+  three to nine points; in the 35 validation runs Stan warned of divergent
+  transitions or low effective sample size with no record of the variable
+  affected. Adds `posterior` and `rstan` to Imports.
+* The `analyze_weighted_centroids()` help said its fixed seed (1234) served
+  reproducibility of the plotted ribbons. It governs the MCMC draws, and so
+  every slope, interval, PD and ROPE figure; the text now says so and that
+  the seed is independent of the one passed to `rENM()`.
+
 * `summarize_variable_contributions()` now ranks the top variables by their
   average contribution over all intervals, an interval in which a variable
   was not selected counting as zero. It ranked by the mean over selected

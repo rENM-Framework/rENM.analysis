@@ -10,7 +10,11 @@
 #' Slope posteriors are summarized with 95\% CI, \code{p_direction} (PD),
 #' and ROPE (percent of posterior within the practical equivalence band).
 #' Posterior expected values are computed on a 5-year grid for plotting
-#' ribbons and trend lines. A fixed seed (1234) is used for reproducibility.
+#' ribbons and trend lines. The random number generator is set to 1234
+#' immediately before both \code{stan_glm()} calls, so the MCMC draws, and
+#' with them every slope, interval, PD and ROPE figure, are the same on every
+#' run. This seed is fixed inside the function and is independent of the
+#' \code{seed} passed to \code{rENM()}.
 #'
 #' \strong{ROPE decision rule (slope).}
 #' Let \code{w = rope_width_deg_per_year}. The posterior is evaluated against
