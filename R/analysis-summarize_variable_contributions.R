@@ -287,7 +287,8 @@ summarize_variable_contributions <- function(alpha_code,
   pal_base <- c(
     "#0072B2", "#D55E00", "#009E73", "#CC79A7",
     "#E69F00", "#56B4E9", "#000000", "#F0E442",
-    "#4477AA", "#66CCEE", "#228833", "#CCBB44",
+    # 9 and 10 are solid lines, like 1, 2, 5 and 6, so need distinct colours
+    "#882255", "#999933", "#228833", "#CCBB44",
     "#EE6677", "#AA3377", "#BBBBBB"
   )
   more_needed <- max(0, K - length(pal_base))
