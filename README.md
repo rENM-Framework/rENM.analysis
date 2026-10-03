@@ -8,7 +8,7 @@
 
 `rENM.analysis` computes the core analytical products of the rENM Framework. It transforms modeled suitability outputs into interpretable trends, spatial metrics, and ecological signals.
 
-This package depends on `rENM.core` for project-directory resolution and species metadata access. All functions accept an optional `project_dir` argument; see `?rENM_project_dir` for configuration options.
+This package depends on `rENM.core` for project-directory resolution and species metadata access. Functions find the project directory through `rENM.core::rENM_project_dir()`; see `?rENM_project_dir` for configuration options.
 
 ## Key functions
 
@@ -20,9 +20,10 @@ This package depends on `rENM.core` for project-directory resolution and species
 | `find_range_change_percentages()` | Quantify trend sign proportions within the GAP range |
 | `find_weighted_centroid()` | Compute suitability-weighted spatial centroids |
 | `analyze_weighted_centroids()` | Fit Bayesian trends to centroid latitude and longitude |
-| `find_bioclimatic_velocity()` | Estimate climate-space displacement between 1980 and 2020 |
+| `find_bioclimatic_velocity()` | Estimate the distance, bearing, and velocity of the suitability centroid's shift |
 | `find_hot_spots()` | Identify cells with accelerating suitability declines |
 | `create_hot_spot_map()` | Map hot spots within states intersecting the GAP range |
+| `find_boundary_trend_statistics()` | Compare trends inside the GAP range with the 250 km ring around it |
 | `create_state_trend_analysis()` | Per-state suitability trend map and statistics |
 | `create_suitability_change_map()` | Full workflow for suitability change trend visualization |
 | `gather_variable_contributions()` | Consolidate per-year variable importance files |
@@ -50,39 +51,29 @@ Set up a project directory and generate modeled suitability surfaces first (see 
 ``` r
 library(rENM.analysis)
 
-proj <- "/path/to/your/rENM/project"
-
-# 1. Compute temporal suitability trends
-find_suitability_trend("CASP")
-find_suitability_change_trend("CASP")
-
-# 2. Summarize trend statistics
-find_trend_percentages("CASP")
-find_range_change_percentages("CASP")
-
-# 3. Spatial centroid analysis
-find_weighted_centroid("CASP")
-analyze_weighted_centroids("CASP")
-find_bioclimatic_velocity("CASP")
-
-# 4. Hot spots and state-level summaries
-find_hot_spots("CASP")
-create_hot_spot_map("CASP")
-create_state_trend_analysis("CASP")
-
-# 5. Variable contribution analysis
-gather_variable_contributions("CASP")
-summarize_variable_contributions("CASP")
-```
-
-For interactive work, configure the project directory once per session to avoid passing it to every function:
-
-``` r
+# set once per session, or set RENM_PROJECT_DIR in ~/.Renviron
 options(rENM.project_dir = "/path/to/your/rENM/project")
 
+# 1. Suitability trend and summary statistics
 find_suitability_trend("CASP")
-find_weighted_centroid("CASP")
-# ...
+find_trend_percentages("CASP")
+find_range_change_percentages("CASP")
+create_state_trend_analysis("CASP")
+
+# 2. Centroid shift and bioclimatic velocity
+analyze_weighted_centroids("CASP")
+find_bioclimatic_velocity("CASP")
+save_trend_plot_with_centroids("CASP")
+
+# 3. Variable contributions
+gather_variable_contributions("CASP")
+summarize_variable_contributions("CASP")
+
+# 4. Change trend, hot spots, and boundary statistics
+create_suitability_change_map("CASP")
+find_trend_percentages("CASP", layer = "Suitability-Change-Trend")
+create_hot_spot_map("CASP")
+find_boundary_trend_statistics("CASP")
 ```
 
 ## Analysis pipeline
@@ -90,26 +81,25 @@ find_weighted_centroid("CASP")
 ```         
 find_suitability_trend()
         ↓
-find_suitability_change_trend()
-        ↓
 find_trend_percentages()
 find_range_change_percentages()
-        ↓
-find_weighted_centroid()
-        ↓
-analyze_weighted_centroids()
-find_bioclimatic_velocity()
-        ↓
-find_hot_spots()
-create_hot_spot_map()
 create_state_trend_analysis()
         ↓
-gather_variable_contributions()
+analyze_weighted_centroids()      ← calls find_weighted_centroid()
+find_bioclimatic_velocity()
+save_trend_plot_with_centroids()
         ↓
+gather_variable_contributions()
 summarize_variable_contributions()
+        ↓
+create_suitability_change_map()   ← calls find_suitability_change_trend()
+find_trend_percentages(layer = "Suitability-Change-Trend")
+        ↓
+create_hot_spot_map()             ← calls find_hot_spots()
+find_boundary_trend_statistics()
 ```
 
-Trend rasters are written to `<run_dir>/Trends/suitability/`. Centroid and velocity outputs go to `<run_dir>/Trends/centroids/`. Variable contribution summaries go to `<run_dir>/Trends/variables/`. All functions append a structured summary block to `<run_dir>/_log.txt`.
+Trend rasters are written to `<run_dir>/Trends/suitability/`. Centroid and velocity outputs go to `<run_dir>/Trends/centroids/`. Variable contribution summaries go to `<run_dir>/Trends/variables/`. Most functions append a structured summary block to `<run_dir>/_log.txt`.
 
 ## Role in the rENM Framework
 

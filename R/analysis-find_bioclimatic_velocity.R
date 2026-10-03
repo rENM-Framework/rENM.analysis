@@ -1,4 +1,4 @@
-#' Finds bioclimatic from weighted centroids
+#' Finds bioclimatic velocity from weighted centroids
 #'
 #' Computes geodesic distance, initial bearing, and velocity between
 #' 1980 and 2020 weighted centroids derived from prior analyses.

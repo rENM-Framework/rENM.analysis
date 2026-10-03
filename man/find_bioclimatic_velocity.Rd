@@ -2,7 +2,7 @@
 % Please edit documentation in R/analysis-find_bioclimatic_velocity.R
 \name{find_bioclimatic_velocity}
 \alias{find_bioclimatic_velocity}
-\title{Finds bioclimatic from weighted centroids}
+\title{Finds bioclimatic velocity from weighted centroids}
 \usage{
 find_bioclimatic_velocity(
   alpha_code,
