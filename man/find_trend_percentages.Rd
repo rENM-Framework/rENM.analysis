@@ -69,6 +69,12 @@ the full modeled extent.
 \code{<alpha_code>-<layer>-Percentages.csv}, where \code{<layer>}
 is the \code{layer} argument, so the suitability trend and the
 change trend each get their own file.
+\item A regional breakdown beside it,
+\code{<alpha_code>-<layer>-Regions.csv}: the area carrying data,
+the area-based positive share and the median value in each ninth
+of the extent (northwest to southeast, thirds of its longitude and
+latitude span). The AI narrative describes where trends lie from
+this table rather than from the raster.
 \item Processing summary appended to:
 \code{<project_dir>/runs/<alpha_code>/}
 \code{_log.txt}

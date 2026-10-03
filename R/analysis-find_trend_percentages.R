@@ -18,6 +18,12 @@
 #'         \code{<alpha_code>-<layer>-Percentages.csv}, where \code{<layer>}
 #'         is the \code{layer} argument, so the suitability trend and the
 #'         change trend each get their own file.
+#'   \item A regional breakdown beside it,
+#'         \code{<alpha_code>-<layer>-Regions.csv}: the area carrying data,
+#'         the area-based positive share and the median value in each ninth
+#'         of the extent (northwest to southeast, thirds of its longitude and
+#'         latitude span). The AI narrative describes where trends lie from
+#'         this table rather than from the raster.
 #'   \item Processing summary appended to:
 #'         \code{<project_dir>/runs/<alpha_code>/}
 #'         \code{_log.txt}
@@ -90,7 +96,8 @@
 #' }
 #'
 #' @importFrom readr write_csv
-#' @importFrom terra rast ncell global cellSize values
+#' @importFrom terra rast ncell global cellSize values ext as.data.frame
+#' @importFrom stats median
 #' @importFrom tibble tibble
 #'
 #' @examples
@@ -255,6 +262,44 @@ find_trend_percentages <- function(
   readr::write_csv(res, out_csv)
   message("Wrote CSV: ", out_csv)
 
+  # ---------------------------- Regional breakdown ----------------------------
+  # The narrative describes where positive and negative areas lie. Asked to
+  # read that from the GeoTIFF, one provider placed the strongest declines
+  # in the wrong part of the extent and inverted the change trend's central
+  # belt. A table of the same shares by ninth of the extent turns that into
+  # reading figures, which both providers do reliably. Thirds are taken of
+  # the extent's longitude and latitude span; shares are area-based, as
+  # above.
+  bump("Computing positive share by ninth of the extent")
+  out_regions <- file.path(
+    trend_dir,
+    sprintf("%s-%s-Regions.csv", alpha_code, layer)
+  )
+  ext <- terra::ext(r)
+  df  <- terra::as.data.frame(c(r, cs_km2), xy = TRUE, na.rm = TRUE)
+  names(df)[3:4] <- c("value", "area")
+  third <- function(v, lo, hi) pmin(3L, pmax(1L, 1L + floor(3 * (v - lo) / (hi - lo))))
+  df$col <- third(df$x, ext$xmin, ext$xmax)
+  df$row <- 4L - third(df$y, ext$ymin, ext$ymax)   # row 1 is the north
+  region_names <- matrix(
+    c("northwest", "north",   "northeast",
+      "west",      "central", "east",
+      "southwest", "south",   "southeast"),
+    nrow = 3, byrow = TRUE
+  )
+  regions <- do.call(rbind, lapply(1:3, function(i) do.call(rbind, lapply(1:3, function(j) {
+    d <- df[df$row == i & df$col == j, , drop = FALSE]
+    a <- sum(d$area)
+    tibble::tibble(
+      region           = region_names[i, j],
+      data_area_km2    = round(a, 1),
+      percent_positive = if (a > 0) round(100 * sum(d$area[d$value > 0]) / a, 1) else NA_real_,
+      median_value     = if (nrow(d)) signif(stats::median(d$value), 3) else NA_real_
+    )
+  }))))
+  readr::write_csv(regions, out_regions)
+  message("Wrote CSV: ", out_regions)
+
   # ---------------------------- Append processing summary log ---------------
   bump("Appending processing summary to runs root _log.txt")
   t_end   <- Sys.time()
@@ -299,9 +344,10 @@ find_trend_percentages <- function(
     sprintf("%-18s %s", "Valid area (km^2):",  fmt_area(valid_area_km2)),
     sprintf("%-18s %s", "Positive area:",      fmt_area(positive_area_km2)),
     sprintf("%-18s %s", "Negative area:",      fmt_area(negative_area_km2)),
-    sprintf("%-18s %s", "Outputs saved:", "1 CSV"),
+    sprintf("%-18s %s", "Outputs saved:", "2 CSV"),
     sprintf("%-18s %.3f sec", "Total elapsed:", elapsed),
-    sprintf("%-18s %s", "Output file:", out_csv)
+    sprintf("%-18s %s", "Output file:", out_csv),
+    sprintf("%-18s %s", "Output file:", out_regions)
   )
 
   wrote_ok <- TRUE

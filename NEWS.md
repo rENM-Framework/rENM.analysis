@@ -1,4 +1,12 @@
 # rENM.analysis 0.2.0.9000
+* `find_trend_percentages()` also writes `<CODE>-<layer>-Regions.csv`: the
+  area carrying data, the area-based positive share and the median value in
+  each ninth of the extent, from northwest to southeast. The AI narrative
+  describes where trends lie from this table instead of reading the raster.
+* The variable contribution plot gives its 9th and 10th variables colours
+  distinct from the 1st and 6th. All four are solid lines, and two pairs
+  had been near-identical blues.
+
 * `summarize_variable_contributions()` records convergence diagnostics for
   each per-variable Bayesian fit in the BR-Stats file: `rhat_max`,
   `ess_bulk_min`, `ess_tail_min`, `n_divergent` and `fit_ok`, the last

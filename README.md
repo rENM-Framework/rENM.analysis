@@ -16,7 +16,7 @@ This package depends on `rENM.core` for project-directory resolution and species
 |------------------------------------|------------------------------------|
 | `find_suitability_trend()` | Compute per-cell Theil-Sen trends and Mann-Kendall statistics |
 | `find_suitability_change_trend()` | Compute the suitability change trend (trend in successive changes) |
-| `find_trend_percentages()` | Summarize positive, negative, and zero trend proportions |
+| `find_trend_percentages()` | Summarize positive, negative, and zero trend proportions, overall and by region |
 | `find_range_change_percentages()` | Quantify trend sign proportions within the GAP range |
 | `find_weighted_centroid()` | Compute suitability-weighted spatial centroids |
 | `analyze_weighted_centroids()` | Fit Bayesian trends to centroid latitude and longitude |
